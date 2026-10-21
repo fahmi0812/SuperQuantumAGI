@@ -90,7 +90,32 @@ Selain pemodelan LLM, repositori ini memuat harness mandiri yang berjalan secara
 
 ---
 
-## Memulai Cepat
+## Instalasi Global ke OpenCode
+
+Agar SuperQuantumAGI aktif secara default di **seluruh direktori kerja** (bukan hanya di dalam folder repositori), jalankan installer global:
+
+```bash
+# Pasang symlink dan sinkronisasi konfigurasi ke ~/.config/opencode/
+npm run install:global
+```
+
+Periksa hasil pemasangan:
+```bash
+# Pratinjau tanpa menulis perubahan ke disk
+node scripts/install.mjs --dry-run
+
+# Lepas pemasangan dan pulihkan konfigurasi semula
+npm run uninstall:global
+```
+
+Setelah dipasang secara global:
+1. **Buka folder proyek mana pun:** Jalankan `opencode` di folder apa pun di sistem Anda. OpenCode otomatis menggunakan agent `orchestrator` SuperQuantumAGI sebagai default.
+2. **Perintah deterministik CLI:** Perintah `superq` dan `smartdoc-cli` tersedia secara global di terminal (`~/.local/bin/superq`).
+3. **Pembaruan Otomatis:** Karena komponen dipasang menggunakan symlink terkelola, menjalankan `git pull` di repositori ini akan langsung memperbarui seluruh agen, skill, dan aturan global secara instan.
+
+---
+
+## Memulai Cepat (Lokal Repositori)
 
 1. **Kloning repositori dan persiapkan berkas lingkungan:**
    ```bash
@@ -105,12 +130,17 @@ Selain pemodelan LLM, repositori ini memuat harness mandiri yang berjalan secara
    node ci/run-gates.mjs
    ```
 
-3. **Jalankan OpenCode di dalam direktori repositori:**
+3. **Pasang secara global (opsional namun disarankan):**
+   ```bash
+   npm run install:global
+   ```
+
+4. **Jalankan OpenCode di direktori mana pun:**
    ```bash
    opencode
    ```
 
-4. **Verifikasi status koneksi MCP:**
+5. **Verifikasi status koneksi MCP:**
    ```bash
    opencode mcp list
    ```

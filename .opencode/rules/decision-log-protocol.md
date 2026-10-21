@@ -32,7 +32,7 @@ Default: `decisions.tsv` in the work dir, or `.audit/<task-slug>.tsv`. Leave it 
 ## How to write a row
 
 ```bash
-.opencode/skills/decision-log/scripts/log.sh <logfile> <phase> <decision> <why> <evidence> <result>
+~/.config/opencode/skills/decision-log/scripts/log.sh <logfile> <phase> <decision> <why> <evidence> <result>
 ```
 
 The helper writes the header on first use, strips tabs and newlines, and prefixes cells that start with `=`, `+`, `-`, or `@`.
