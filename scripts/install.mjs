@@ -265,15 +265,20 @@ function installLinks(targetDir, binDir, dryRun, managedFiles, report) {
     (item) => item.endsWith(".md"),
   );
 
-  const pluginSrcDir = path.join(ROOT_DIR, ".opencode/plugins/superquantumagi");
+  const pluginSrcDir = path.join(ROOT_DIR, "harness/plugin-global");
   if (fs.existsSync(pluginSrcDir)) {
     const res = safeSymlink(
       pluginSrcDir,
-      path.join(targetDir, "plugins/superquantumagi"),
+      path.join(targetDir, "plugins/superquantumagi-global"),
       dryRun,
       managedFiles,
     );
-    report.push(`plugin: superquantumagi -> ${res.status}`);
+    report.push(`plugin: superquantumagi-global -> ${res.status}`);
+  }
+  const legacyPlugin = path.join(targetDir, "plugins/superquantumagi");
+  if (pointsIntoRepo(legacyPlugin)) {
+    if (!dryRun) fs.unlinkSync(legacyPlugin);
+    report.push("plugin: superquantumagi -> removed duplicate symlink");
   }
 
   const cliSrc = path.join(ROOT_DIR, "harness/smartdoc/cli.mjs");

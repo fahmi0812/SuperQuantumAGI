@@ -78,9 +78,7 @@ function postPushReminder(directory: string | undefined): string | null {
   ].join("\n");
 }
 
-export default Plugin.define({
-  id: "superquantumagi",
-  async setup(ctx) {
+export async function registerSuperquantum(ctx: any): Promise<void> {
     const directory = ctx.location?.directory;
 
     await ctx.permission.hook("evaluate", async (event) => {
@@ -175,5 +173,11 @@ export default Plugin.define({
       if (!state.line) return;
       event.system.push({ type: "text", text: state.line });
     });
+}
+
+export default Plugin.define({
+  id: "superquantumagi",
+  async setup(ctx) {
+    await registerSuperquantum(ctx);
   },
 });
