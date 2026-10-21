@@ -116,6 +116,9 @@ test("layer-0 slash commands early-exit and general code falls through", () => {
   assert.equal(routeLayer0("/audit").sector, "orchestration-quality");
   assert.equal(routeLayer0("/pentest").profile, "Pentest");
   assert.equal(routeLayer0("Refactor the database connection pool in TypeScript").matched, false);
+  assert.equal(routeLayer0("commit push").sector, "coding");
+  assert.equal(routeLayer0("commit push").complexity, "Low");
+  assert.equal(routeLayer0("commit to a new design direction").matched, false);
 });
 
 test("routeTask hits the golden set at or above 90 percent", async () => {
@@ -345,7 +348,9 @@ test("plugin wraps sector shells and triages with the active model", () => {
   const src = fs.readFileSync(path.join(root, ".opencode/plugins/superquantumagi/index.ts"), "utf8");
   assert.equal(src.includes("applyShellCreateBefore"), true);
   assert.equal(src.includes("createActiveModelCompleter"), true);
-  assert.equal(src.includes("session.generate"), true);
+  assert.equal(src.includes("session.hook(\"context\""), true);
+  assert.equal(src.includes("session.generate"), false);
+  assert.equal(src.includes("event.prompt.text ="), false);
   assert.equal(src.includes("superq-triage]-error"), false);
   assert.equal(src.includes("classifyDeterministic"), false);
   assert.equal(src.includes("litellm"), false);

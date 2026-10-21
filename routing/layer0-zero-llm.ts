@@ -76,6 +76,13 @@ const REGEX_RULES: RegexRule[] = [
     defaultComplexity: "Low",
     defaultProfile: "Default",
   },
+  // Sector 2: short git operations. Kept specific so "commit to a design" does not match.
+  {
+    pattern: /\b(git\s+(?:commit|push|status|diff|pull|add)|commit\s+push|commit\s+and\s+push)\b/i,
+    sector: "coding",
+    defaultComplexity: "Low",
+    defaultProfile: "Default",
+  },
 ];
 
 export function routeLayer0(prompt: string): Layer0Decision {

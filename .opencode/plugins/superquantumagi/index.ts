@@ -14,6 +14,7 @@ import {
   shellCommandFromInput,
 } from "../../../harness/sandbox/sector-shell.cjs";
 import { createActiveModelCompleter } from "../../../routing/active-model.ts";
+import { routeLayer0 } from "../../../routing/layer0-zero-llm.ts";
 import { routeTask } from "../../../routing/route-task.ts";
 import {
   OFFENSIVE_SERVERS,
@@ -22,6 +23,25 @@ import {
 } from "./policy.cjs";
 
 const TRIAGE_MARK = "[superq-triage]";
+
+interface TriageState {
+  text: string;
+  line?: string;
+  pending?: Promise<void>;
+}
+
+const triageBySession = new Map<string, TriageState>();
+
+function triageLine(routed: { sector: string; complexity: string; profile: string }): string {
+  return [
+    "SuperQuantumAGI triage. Do not repeat this block to the user.",
+    `${TRIAGE_MARK} ${JSON.stringify({
+      sector: routed.sector,
+      complexity: routed.complexity,
+      profile: routed.profile,
+    })}`,
+  ].join("\n");
+}
 
 export default Plugin.define({
   id: "superquantumagi",
@@ -69,45 +89,49 @@ export default Plugin.define({
       applyShellCreateBefore(event);
     });
 
-    await ctx.session.hook("prompt", async (event) => {
+    // Admission must stay synchronous. A model call here delays the prompt and
+    // rewriting event.prompt.text persists the triage JSON as the user's message.
+    await ctx.session.hook("prompt", (event) => {
       const text = event.prompt?.text;
-      if (typeof text !== "string" || text.includes(TRIAGE_MARK)) return;
-      let agent = "";
-      let sessionModel: unknown;
-      try {
-        const session = await ctx.session.get({ sessionID: event.sessionID });
-        agent = session?.agent || session?.agentID || "";
-        sessionModel = session?.model;
-      } catch {
-        agent = "";
-      }
+      if (typeof text !== "string" || !text.trim() || text.includes(TRIAGE_MARK)) return;
+      triageBySession.set(String(event.sessionID), { text });
+      event.metadata = { ...event.metadata, superqTriage: "pending" };
+    });
+
+    await ctx.session.hook("context", async (event) => {
+      const agent = String(event.agent || "");
       if (agent && agent !== "orchestrator") return;
-      try {
-        const routed = await routeTask(text, {
-          complete: async (triagePrompt) => {
-            if (ctx.session.generate) {
-              try {
-                const generated = await ctx.session.generate({
-                  sessionID: event.sessionID,
-                  prompt: triagePrompt,
-                });
-                if (generated?.text) return generated.text;
-              } catch {
-                // The session model call failed. Try the selected model once below.
-              }
-            }
-            return createActiveModelCompleter(ctx, sessionModel)(triagePrompt);
-          },
-        });
-        if (routed.layer !== "layer1") return;
-        event.prompt.text = `${TRIAGE_MARK} ${JSON.stringify({
-          sector: routed.sector,
-          complexity: routed.complexity,
-          profile: routed.profile,
-        })}\n\n${text}`;
-      } catch {
-        // Leave the user prompt untouched. A missing model is not an error to inject.
+      const state = triageBySession.get(String(event.sessionID));
+      if (!state) return;
+
+      if (state.line === undefined && !state.pending) {
+        const early = routeLayer0(state.text);
+        if (early.matched && early.sector && early.complexity && early.profile) {
+          const profile = early.sector === "reverse-engineering" ? "ReAnalysis" : early.profile;
+          state.line = triageLine({
+            sector: early.sector,
+            complexity: early.complexity,
+            profile,
+          });
+        } else {
+          state.pending = routeTask(state.text, {
+            complete: createActiveModelCompleter(ctx, event.model),
+          })
+            .then((routed) => {
+              state.line = triageLine(routed);
+            })
+            .catch(() => {
+              state.line = "";
+            })
+            .finally(() => {
+              state.pending = undefined;
+            });
+        }
       }
+
+      if (state.pending) await state.pending;
+      if (!state.line) return;
+      event.system.push({ type: "text", text: state.line });
     });
   },
 });
