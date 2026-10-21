@@ -9,7 +9,7 @@ license: MIT
 
 One primary specialist for a document job. Do not load `smartbook-ingest` unless the user asked to create/update/inspect/rebuild a SmartBook. Reading an existing SmartBook is source resolution, not a second specialist.
 
-Deterministic work uses `node harness/smartdoc/cli.mjs smartdoc` / `node harness/smartdoc/cli.mjs smartbook`. Model work is reasoning only.
+Deterministic work uses `superq smartdoc` / `superq smartbook` (or `node harness/smartdoc/cli.mjs smartdoc` / `smartbook`). Model work is reasoning only.
 
 ```text
 inspect → roles → contract → frontier? → GOAL_LOCK

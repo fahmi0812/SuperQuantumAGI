@@ -24,7 +24,7 @@ Persistent writes go to the **resolved SmartDoc root** only (`CLI --root` → `S
 
 ## Run
 
-1. `node harness/smartdoc/cli.mjs smartdoc status --json` and `node harness/smartdoc/cli.mjs smartbook list`.
+1. `superq smartdoc status --json` and `superq smartbook list` (or `node harness/smartdoc/cli.mjs ...`).
 2. Extract with `node harness/smartdoc/cli.mjs smartdoc extract PATH`. Scanned PDFs/photos use OCR AUTO when Tesseract is configured. If `NOT_CONFIGURED`, stop and report. Combined PDF text is page-delimited with form-feed so ingest keeps page sections.
 3. Ingest: `node harness/smartdoc/cli.mjs smartbook ingest PATH --slug <slug>`. Same source hash → `unchanged`. Failed/skipped pages keep source page numbers; they are not renumbered.
 4. Validate: `node harness/smartdoc/cli.mjs smartbook validate <slug>`.

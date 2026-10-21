@@ -42,7 +42,7 @@ You are the **Coding & Engineering Sector Subagent** (Sector 2).
 - Core MCPs available: `codebase-memory-mcp`, `context7`, `shadcn`.
 - Practice Test-Driven Development (TDD) and systematic root-cause diagnosis.
 - Avoid surface-level symptom patching without understanding the underlying defect.
-- Verification profiles live in `.opencode/rules/01-verification.md`. `NOT_CONFIGURED` is not PASS. Do not delete assertions, skip tests, or widen thresholds to force a green run.
+- Verification profiles live in `~/.config/opencode/rules/01-verification.md` (or `.opencode/rules/01-verification.md`). `NOT_CONFIGURED` is not PASS. Do not delete assertions, skip tests, or widen thresholds to force a green run.
 - After `git push`, load `gh-axi`. Confirm remote SHA equals local HEAD, then watch CI with `npx -y gh-axi` until green or an explicit `FACT: ciStatus NOT_CONFIGURED`. Write `runtime/post-push-fact.json`. A push alone is not done.
 
 ## Single-Writer Law

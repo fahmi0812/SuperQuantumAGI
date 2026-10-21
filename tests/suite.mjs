@@ -687,6 +687,59 @@ test("smartdoc root resolves explicit, SUPERQ_SMARTDOC, OPENCODE_SMARTDOC, and d
   assert.equal(defJson.capabilities.TXT_WRITE, "READY");
 });
 
+test("install script creates symlinks, merges opencode config non-destructively, and uninstalls cleanly", async () => {
+  const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-install-test-"));
+  const targetDir = path.join(tmpBase, "config");
+  const binDir = path.join(tmpBase, "bin");
+  fs.mkdirSync(targetDir, { recursive: true });
+  fs.mkdirSync(binDir, { recursive: true });
+
+  const initialConfig = {
+    provider: { "custom-provider": { url: "http://localhost:1234" } },
+    model: "custom-provider/custom-model",
+    permissions: [{ action: "custom", effect: "deny" }],
+    agent: { custom_agent: { mode: "subagent" } },
+    default_agent: "build",
+  };
+  fs.writeFileSync(path.join(targetDir, "opencode.json"), JSON.stringify(initialConfig, null, 2));
+
+  const installMod = await import("../scripts/install.mjs");
+  const installRes = installMod.install({ dryRun: false, targetDir, binDir });
+  assert.equal(installRes.success, true);
+
+  assert.equal(fs.existsSync(path.join(targetDir, "agents/orchestrator.md")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "agents/sectors")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "skills/smartdoc")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "commands/blast-radius.md")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "rules/01-verification.md")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "plugins/superquantumagi")), true);
+  assert.equal(fs.existsSync(path.join(binDir, "superq")), true);
+
+  const merged = JSON.parse(fs.readFileSync(path.join(targetDir, "opencode.json"), "utf8"));
+  assert.equal(merged.default_agent, "orchestrator");
+  assert.equal(merged.provider["custom-provider"].url, "http://localhost:1234");
+  assert.equal(merged.model, "custom-provider/custom-model");
+  assert.equal(merged.agent.custom_agent.mode, "subagent");
+  assert.equal(merged.mcp.servers["codebase-memory-mcp"].type, "local");
+  assert.equal(merged.mcp.servers["sliver"].disabled, true);
+  assert.equal(merged.experimental.subagent_depth, 1);
+
+  const uninstallRes = installMod.uninstall({ dryRun: false, targetDir, binDir });
+  assert.equal(uninstallRes.success, true);
+
+  assert.equal(fs.existsSync(path.join(targetDir, "agents/orchestrator.md")), false);
+  assert.equal(fs.existsSync(path.join(binDir, "superq")), false);
+
+  const restored = JSON.parse(fs.readFileSync(path.join(targetDir, "opencode.json"), "utf8"));
+  assert.equal(restored.default_agent, "build");
+  assert.equal(restored.provider["custom-provider"].url, "http://localhost:1234");
+  assert.equal(restored.model, "custom-provider/custom-model");
+  assert.equal(restored.agent.custom_agent.mode, "subagent");
+  assert.equal(restored.mcp, undefined);
+
+  fs.rmSync(tmpBase, { recursive: true, force: true });
+});
+
 for (const item of tests) {
   try {
     await item.fn();
