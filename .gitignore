@@ -8,6 +8,7 @@ runtime/
 traces/
 *.log
 *.jsonl
+.codebase-memory/
 
 # Dependencies & build outputs
 node_modules/
