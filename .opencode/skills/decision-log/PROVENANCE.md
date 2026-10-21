@@ -1,0 +1,5 @@
+Source: https://github.com/kuker24/OpenCodeHighEnd
+Pin: 30d394fb37bbe1ca64abe1a660aefd91ac7d99fc
+Path: manual-skills/decision-log
+Upstream-SHA: # TODO: resolve pin
+License: part of OpenCodeHighEnd manual-skills at the pin above.

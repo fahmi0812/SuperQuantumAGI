@@ -34,7 +34,10 @@ function buildBwrapCommand(command, options) {
   if (options.allowNetwork === false) args.push("--unshare-net");
   args.push("--chdir", options.workspaceDir);
   args.push("--die-with-parent");
-  args.push("/bin/bash", "-c", command);
+  // ubuntu-latest uses a merged /usr. /bin/bash is often a symlink that does not
+  // resolve after the bind, while /usr is always mounted above.
+  const shell = fs.existsSync("/usr/bin/bash") ? "/usr/bin/bash" : "/bin/bash";
+  args.push(shell, "-c", command);
   return { binary: "bwrap", args };
 }
 

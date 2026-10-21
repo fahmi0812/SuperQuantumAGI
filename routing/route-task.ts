@@ -5,6 +5,8 @@ import { routeLayer0 } from "./layer0-zero-llm.ts";
 export interface RouteTaskResult extends Layer1TriageOutput {
   layer: "layer0" | "layer1";
   status: "matched" | "manual_fallback";
+  qualityObligation?: "none" | "post-push";
+  slashOnly?: boolean;
 }
 
 export interface RouteTaskOptions {
@@ -28,6 +30,8 @@ export async function routeTask(prompt: string, options: RouteTaskOptions = {}):
         isEmergencyPatch: false,
       },
       reasoning: `layer0:${early.type || "matched"}`,
+      qualityObligation: early.qualityObligation,
+      slashOnly: early.slashOnly,
     };
   }
 

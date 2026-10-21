@@ -3,14 +3,31 @@
  * 0 token, < 10ms deterministic early-exit router (PRD §4.1).
  */
 
-import type { Layer0Decision, SectorID } from "../harness/io-schema/types.ts";
+import type { Layer0Decision, QualityObligation, SectorID } from "../harness/io-schema/types.ts";
 
 interface RegexRule {
   pattern: RegExp;
   sector: SectorID;
   defaultComplexity: "Low" | "High";
   defaultProfile: "Default" | "Pentest" | "ReAnalysis";
+  qualityObligation?: QualityObligation;
 }
+
+const MANUAL_SLASH = new Set([
+  "/blast-radius",
+  "/why",
+  "/create-verification-skill",
+  "/maintain-verification-skill",
+  "/architect",
+  "/decision-log",
+  "/reflect",
+  "/interrogate",
+  "/figure-it-out",
+  "/wizard",
+  "/improve-codebase-architecture",
+  "/arena",
+  "/demo-video",
+]);
 
 const REGEX_RULES: RegexRule[] = [
   // Sector 3: Reverse Engineering (strong keywords)
@@ -76,12 +93,21 @@ const REGEX_RULES: RegexRule[] = [
     defaultComplexity: "Low",
     defaultProfile: "Default",
   },
-  // Sector 2: short git operations. Kept specific so "commit to a design" does not match.
+  // Push stays Low so it does not fan out, but it is not Low-only: post-push FACT is mandatory.
   {
-    pattern: /\b(git\s+(?:commit|push|status|diff|pull|add)|commit\s+push|commit\s+and\s+push)\b/i,
+    pattern: /\b(git\s+push|commit\s+push|commit\s+and\s+push)\b/i,
     sector: "coding",
     defaultComplexity: "Low",
     defaultProfile: "Default",
+    qualityObligation: "post-push",
+  },
+  // Other short git operations. Kept specific so "commit to a design" does not match.
+  {
+    pattern: /\bgit\s+(?:commit|status|diff|pull|add)\b/i,
+    sector: "coding",
+    defaultComplexity: "Low",
+    defaultProfile: "Default",
+    qualityObligation: "none",
   },
 ];
 
@@ -124,7 +150,29 @@ export function routeLayer0(prompt: string): Layer0Decision {
           complexity: "Low",
           profile: "Default",
         };
+      case "/verify-push":
+        return {
+          matched: true,
+          type: "slash_command",
+          command: "/verify-push",
+          sector: "coding",
+          complexity: "Low",
+          profile: "Default",
+          qualityObligation: "post-push",
+          slashOnly: true,
+        };
       default:
+        if (MANUAL_SLASH.has(command)) {
+          return {
+            matched: true,
+            type: "slash_command",
+            command,
+            sector: "orchestration-quality",
+            complexity: "Low",
+            profile: "Default",
+            slashOnly: true,
+          };
+        }
         break;
     }
   }
@@ -139,6 +187,7 @@ export function routeLayer0(prompt: string): Layer0Decision {
         complexity: rule.defaultComplexity,
         profile: rule.defaultProfile,
         matchedPattern: rule.pattern.source,
+        qualityObligation: rule.qualityObligation,
       };
     }
   }

@@ -1,0 +1,21 @@
+rules:
+  - id: sqagi-no-litellm
+    pattern-regex: (?i)\blitellm\b
+    message: LiteLLM is archived. Do not reintroduce a model router.
+    languages: [generic]
+    severity: ERROR
+    paths:
+      include:
+        - harness
+        - routing
+        - ci
+        - .opencode/plugins
+        - .opencode/agents
+  - id: sqagi-no-prompt-rewrite
+    pattern: event.prompt.text = $X
+    message: Do not persist triage or system text into the user prompt.
+    languages: [typescript]
+    severity: ERROR
+    paths:
+      include:
+        - .opencode/plugins

@@ -13,8 +13,65 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bubblewrap
+      - name: Allow bwrap user namespaces
+        run: |
+          set -euo pipefail
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          if [ -e /proc/sys/kernel/unprivileged_userns_clone ]; then
+            sudo sysctl -w kernel.unprivileged_userns_clone=1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Smoke bwrap through the harness builder
+        run: node ci/bwrap-smoke.mjs
       - run: npm ci
       - run: node ci/run-gates.mjs
+      - name: Harness hash is reproducible
+        run: |
+          first="$(node ci/hash-harness.mjs)"
+          second="$(node ci/hash-harness.mjs)"
+          test "$first" = "$second"
+          echo "$first"
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2, pin from OpenCodeHighEnd 30d394f
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0, pin from OpenCodeHighEnd 30d394f
+        with:
+          python-version: "3.12"
+      - name: semgrep
+        run: |
+          python3 -m pip install --quiet 'semgrep==1.179.0'
+          semgrep --config .semgrep.yml --error --metrics=off harness routing ci .opencode/plugins .opencode/agents
+
+  osv-scanner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install osv-scanner 2.6.0
+        run: |
+          curl -fsSL -o /tmp/osv-scanner "https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_linux_amd64"
+          echo "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108  /tmp/osv-scanner" | sha256sum -c -
+          chmod +x /tmp/osv-scanner
+          sudo mv /tmp/osv-scanner /usr/local/bin/osv-scanner
+          osv-scanner --version
+      - name: Scan package-lock.json
+        run: osv-scanner scan source --lockfile=package-lock.json

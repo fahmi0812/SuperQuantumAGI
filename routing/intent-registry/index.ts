@@ -21,6 +21,7 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "planning-with-files", name: "Planning With Files", intentKey: "file_based_task_progress", tier: "T1", description: "Tracks task plans and findings in markdown" },
     { id: "unified-done-gate", name: "Unified Done-Gate", intentKey: "verify_completion_gate", tier: "T1", description: "Deterministic check for task completion" },
     { id: "anti-spin", name: "Anti-Spin Circuit Breaker", intentKey: "prevent_runaway_loops", tier: "T1", description: "Circuit breaker stopping runs at max 3 iterations" },
+    { id: "agent-architecture-audit", name: "Agent Architecture Audit", intentKey: "agent_architecture_audit", tier: "T1", description: "Diagnose agent-loop and context failures. Not a secrets audit." },
   ],
   "coding": [
     { id: "codebase-design", name: "Codebase Design", intentKey: "architectural_code_design", tier: "T1", description: "Designs modular clean architecture" },
@@ -31,6 +32,13 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "api-design", name: "API Design", intentKey: "rest_api_design", tier: "T1", description: "REST resource names, status codes, pagination, and versioning" },
     { id: "contract-first", name: "Contract First", intentKey: "contract_before_implementation", tier: "T1", description: "Locks the API contract before implementation starts" },
     { id: "eval-harness", name: "Eval Harness", intentKey: "eval_before_trust", tier: "T1", description: "Requires an eval set before an agent change is trusted" },
+    { id: "gh-axi", name: "gh-axi", intentKey: "github_ci_ops", tier: "T1", description: "GitHub issues, PRs, and Actions checks after push" },
+    { id: "chrome-devtools-axi", name: "Chrome DevTools Axi", intentKey: "chrome_devtools_failure_inspect", tier: "T1", description: "Inspect an observed browser failure. Not exploratory QA." },
+    { id: "grill-with-docs", name: "Grill With Docs", intentKey: "grill_design_with_docs", tier: "T1", description: "Interview a plan into glossary and ADRs" },
+    { id: "to-spec", name: "To Spec", intentKey: "spec_from_conversation", tier: "T1", description: "Turn an agreed conversation into a local spec" },
+    { id: "to-tickets", name: "To Tickets", intentKey: "tickets_from_spec", tier: "T1", description: "Break a spec into tracer-bullet tickets" },
+    { id: "domain-modeling", name: "Domain Modeling", intentKey: "domain_model_seams", tier: "T1", description: "Sharpen domain terms, glossary, and ADRs" },
+    { id: "click-path-audit", name: "Click Path Audit", intentKey: "click_path_handler_audit", tier: "T1", description: "Trace controls through handlers and shared-store writes" },
   ],
   "reverse-engineering": [
     { id: "reverse-skill", name: "Reverse Skill", intentKey: "re_router_primary", tier: "T1", description: "Primary router for binary and app decompilation" },
@@ -85,6 +93,7 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
   ],
   "devops-infra-finance": [
     { id: "full-performance-audit", name: "Full Performance Audit", intentKey: "infrastructure_performance_audit", tier: "T1", description: "Audits cloud, container, and database performance" },
+    { id: "gh-axi", name: "gh-axi", intentKey: "github_actions_ci", tier: "T1", description: "Inspect GitHub Actions after a push" },
   ],
 };
 
@@ -144,6 +153,9 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
     }
     if (normalized.includes("eval-harness") || normalized.includes("eval harness")) {
       return { skillId: "eval-harness", status: "tie_break" };
+    }
+    if (normalized.includes("gh-axi") || normalized.includes("github ci") || normalized.includes("github_ci_ops")) {
+      return { skillId: "gh-axi", status: "tie_break" };
     }
   }
 

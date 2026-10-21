@@ -15,6 +15,18 @@ export interface QualityLoopInput {
   tracker?: AntiSpinTracker;
 }
 
+/** Agent order after a local change. The loop itself does not shell out. */
+export const QUALITY_LOOP_ORDER = [
+  "local-tests",
+  "scanner-if-release",
+  "commit",
+  "push",
+  "verify-remote-sha",
+  "verify-ci",
+  "fact-ledger",
+  "done",
+] as const;
+
 export function runQualityLoop(input: QualityLoopInput) {
   const tracker = input.tracker ?? new AntiSpinTracker(input.taskId);
   const done = evaluateDoneGate(input.done);
