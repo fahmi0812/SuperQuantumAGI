@@ -740,6 +740,151 @@ test("install script creates symlinks, merges opencode config non-destructively,
   fs.rmSync(tmpBase, { recursive: true, force: true });
 });
 
+test("parseJsonc keeps commas and comment markers inside strings", async () => {
+  const { parseJsonc } = await import("../scripts/install.mjs");
+  const parsed = parseJsonc(`{
+    "$schema": "https://opencode.ai/config.json",
+    // comment with https://example.com
+    "note": "see, } here and // not a comment",
+    "arr": [1, 2,],
+  }`);
+  assert.equal(parsed.$schema, "https://opencode.ai/config.json");
+  assert.equal(parsed.note, "see, } here and // not a comment");
+  assert.deepEqual(parsed.arr, [1, 2]);
+});
+
+test("install refuses to rewrite an unparseable config and writes nothing", async () => {
+  const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-install-bad-"));
+  const targetDir = path.join(tmpBase, "config");
+  const binDir = path.join(tmpBase, "bin");
+  fs.mkdirSync(targetDir, { recursive: true });
+  const configPath = path.join(targetDir, "opencode.json");
+  const raw = "{ not json,\n";
+  fs.writeFileSync(configPath, raw);
+
+  const { install } = await import("../scripts/install.mjs");
+  const result = install({ dryRun: false, targetDir, binDir });
+  assert.equal(result.success, false);
+  assert.equal(fs.readFileSync(configPath, "utf8"), raw);
+  assert.equal(fs.existsSync(path.join(targetDir, "agents/orchestrator.md")), false);
+  assert.equal(fs.existsSync(path.join(targetDir, "superquantumagi.json")), false);
+
+  const cli = spawnSync(
+    "node",
+    ["scripts/install.mjs", "--target-dir", targetDir, "--bin-dir", binDir],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.notEqual(cli.status, 0);
+  assert.equal(fs.readFileSync(configPath, "utf8"), raw);
+  fs.rmSync(tmpBase, { recursive: true, force: true });
+});
+
+test("install dry-run does not write config or symlinks", async () => {
+  const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-install-dry-"));
+  const targetDir = path.join(tmpBase, "config");
+  const binDir = path.join(tmpBase, "bin");
+  fs.mkdirSync(targetDir, { recursive: true });
+  const configPath = path.join(targetDir, "opencode.json");
+  const raw = JSON.stringify({ default_agent: "build", provider: { p: { url: "http://127.0.0.1:9" } } });
+  fs.writeFileSync(configPath, raw);
+
+  const { install } = await import("../scripts/install.mjs");
+  const result = install({ dryRun: true, targetDir, binDir });
+  assert.equal(result.success, true);
+  assert.equal(fs.readFileSync(configPath, "utf8"), raw);
+  assert.equal(fs.existsSync(path.join(targetDir, "agents")), false);
+  assert.equal(fs.existsSync(path.join(binDir, "superq")), false);
+  fs.rmSync(tmpBase, { recursive: true, force: true });
+});
+
+test("reinstall preserves restore baseline, user additions, and drops stale repo symlinks", async () => {
+  const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-install-re-"));
+  const targetDir = path.join(tmpBase, "config");
+  const binDir = path.join(tmpBase, "bin");
+  fs.mkdirSync(targetDir, { recursive: true });
+  fs.mkdirSync(binDir, { recursive: true });
+  const configPath = path.join(targetDir, "opencode.json");
+  fs.writeFileSync(
+    configPath,
+    JSON.stringify({
+      default_agent: "build",
+      provider: { p: { url: "http://127.0.0.1:9" } },
+      instructions: ["keep-me", "notes/01-verification.md-local"],
+      experimental: { keep: true, subagent_depth: 2 },
+    }),
+  );
+
+  const { install, uninstall } = await import("../scripts/install.mjs");
+  assert.equal(install({ dryRun: false, targetDir, binDir }).success, true);
+
+  const stale = path.join(targetDir, "skills/stale-skill");
+  fs.symlinkSync(path.join(root, ".opencode/skills/smartdoc"), stale);
+  const manifestPath = path.join(targetDir, "superquantumagi.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  manifest.managedFiles.push(stale);
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+
+  const mid = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  mid.mcp.servers["user-extra"] = { type: "local", command: ["echo"] };
+  mid.mcp.servers["codebase-memory-mcp"] = { type: "local", command: ["custom-memory"] };
+  mid.experimental.extra = true;
+  fs.writeFileSync(configPath, JSON.stringify(mid));
+
+  assert.equal(install({ dryRun: false, targetDir, binDir }).success, true);
+  assert.equal(fs.existsSync(stale), false);
+
+  const again = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  assert.equal(again.default_agent, "orchestrator");
+  assert.equal(again.provider.p.url, "http://127.0.0.1:9");
+  assert.equal(again.mcp.servers["user-extra"].command[0], "echo");
+  assert.equal(again.mcp.servers["codebase-memory-mcp"].command[0], "custom-memory");
+  assert.equal(again.experimental.extra, true);
+  assert.equal(again.experimental.keep, true);
+  assert.equal(again.experimental.subagent_depth, 1);
+  assert.ok(again.instructions.includes("keep-me"));
+  assert.ok(again.instructions.includes("notes/01-verification.md-local"));
+
+  const restoredManifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  assert.equal(restoredManifest.previousDefaultAgent, "build");
+  assert.equal(restoredManifest.hadExperimental, true);
+  assert.equal(restoredManifest.previousSubagentDepth, 2);
+
+  assert.equal(uninstall({ dryRun: false, targetDir, binDir }).success, true);
+  const restored = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  assert.equal(restored.default_agent, "build");
+  assert.equal(restored.provider.p.url, "http://127.0.0.1:9");
+  assert.equal(restored.mcp.servers["user-extra"].command[0], "echo");
+  assert.equal(restored.mcp.servers["codebase-memory-mcp"].command[0], "custom-memory");
+  assert.equal(restored.mcp.servers.sliver, undefined);
+  assert.equal(restored.experimental.keep, true);
+  assert.equal(restored.experimental.extra, true);
+  assert.equal(restored.experimental.subagent_depth, 2);
+  assert.ok(restored.instructions.includes("keep-me"));
+  assert.ok(restored.instructions.includes("notes/01-verification.md-local"));
+  assert.equal(
+    restored.instructions.includes("~/.config/opencode/rules/01-verification.md"),
+    false,
+  );
+  fs.rmSync(tmpBase, { recursive: true, force: true });
+});
+
+test("uninstall refuses to guess when the manifest is missing", async () => {
+  const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-uninstall-missing-"));
+  const targetDir = path.join(tmpBase, "config");
+  const binDir = path.join(tmpBase, "bin");
+  fs.mkdirSync(targetDir, { recursive: true });
+  const configPath = path.join(targetDir, "opencode.json");
+  fs.writeFileSync(configPath, JSON.stringify({ default_agent: "orchestrator", provider: { p: 1 } }));
+
+  const { uninstall } = await import("../scripts/install.mjs");
+  const result = uninstall({ dryRun: false, targetDir, binDir });
+  assert.equal(result.success, false);
+  const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  assert.equal(cfg.default_agent, "orchestrator");
+  assert.equal(cfg.provider.p, 1);
+  fs.rmSync(tmpBase, { recursive: true, force: true });
+});
+
 for (const item of tests) {
   try {
     await item.fn();
