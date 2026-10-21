@@ -1,0 +1,79 @@
+[
+  {
+    "id": "eval-sec-01",
+    "prompt": "Orchestrate a parallel code audit across 3 subagents and gather results into a markdown report",
+    "expectedSector": "orchestration-quality",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-02",
+    "prompt": "Fix this null pointer exception in user auth service and run Jest tests",
+    "expectedSector": "coding",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-03",
+    "prompt": "Decompile this Android APK and inspect the native lib frida hooks",
+    "expectedSector": "reverse-engineering",
+    "expectedComplexity": "High",
+    "expectedProfile": "ReAnalysis"
+  },
+  {
+    "id": "eval-sec-04",
+    "prompt": "Perform an authorized white-box security audit against SQL injection vulnerabilities in the payment gateway",
+    "expectedSector": "security-pentest",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-05",
+    "prompt": "Geolocate these coordinates and overlay recent Sentinel-2 satellite imagery using Leafmap",
+    "expectedSector": "osint",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-06",
+    "prompt": "Render an explanatory 60fps kinetic typography video using HTML, Playwright, and FFmpeg",
+    "expectedSector": "motion-media",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-07",
+    "prompt": "Extract tables from quarterly earnings report PDF and convert to structured Markdown and Excel",
+    "expectedSector": "data-doc-cad",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-08",
+    "prompt": "Conduct deep academic literature synthesis on speculative decoding algorithms from ArXiv",
+    "expectedSector": "research",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-09",
+    "prompt": "Rewrite this documentation page to eliminate corporate buzzwords and robotic AI cadence",
+    "expectedSector": "writing",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-10",
+    "prompt": "Tailor this software engineer resume for a Staff Distributed Systems role and generate interview questions",
+    "expectedSector": "career",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-11",
+    "prompt": "Analyze cluster node utilization in Kubernetes and generate Terraform cost optimizations",
+    "expectedSector": "devops-infra-finance",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  }
+]

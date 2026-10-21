@@ -1,0 +1,4 @@
+# Offline merge gate is `node ci/run-gates.mjs`.
+# This file is not a runnable promptfoo eval: promptfoo and deepteam need a model
+# endpoint and are not installed as a default CI dependency.
+description: "SuperQuantumAGI routing notes — execute ci/run-gates.mjs"

@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "profile": "offensive-c2",
+  "description": "Offensive security and C2 testing profile. STRICTLY guarded by NFR11. Deterministically rejected unless BOTH --pentest flag and valid consent/scope file exist.",
+  "enabled": false,
+  "lazy": false,
+  "mcp_servers": [
+    "sliver",
+    "adaptixc2",
+    "pentagi",
+    "strix",
+    "caldera",
+    "mythic",
+    "decepticon",
+    "bunkerweb"
+  ],
+  "requires_consent": true,
+  "requires_pentest_flag": true,
+  "consent_file_schema": "consent/pentest-scope.example.json",
+  "safety_level": "controlled-authorization-only"
+}

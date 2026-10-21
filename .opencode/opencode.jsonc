@@ -1,0 +1,113 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "orchestrator",
+  "experimental": {
+    "subagent_depth": 1
+  },
+  "mcp": {
+    "timeout": {
+      "startup": 30000,
+      "catalog": 30000,
+      "execution": 600000
+    },
+    "servers": {
+      // =======================================================================
+      // Core-Active MCP Servers (T1: Enabled by default, no LiteLLM proxy)
+      // =======================================================================
+      "codebase-memory-mcp": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "codebase-memory-mcp@0.11.0"
+        ]
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp"
+      },
+      "shadcn": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "shadcn@4.22.1",
+          "mcp"
+        ]
+      },
+      // =======================================================================
+      // Profile: re-analysis (Reverse Engineering on-demand, lazy, safe)
+      // Activated only on RE intent. Never activates offensive C2.
+      // =======================================================================
+      "ghidra": {
+        "type": "remote",
+        "url": "http://127.0.0.1:8765/mcp",
+        "disabled": true
+      },
+      "jshook": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@jshookmcp/jshook@0.3.4"
+        ],
+        "disabled": true
+      },
+      "idapro": {
+        "type": "remote",
+        "url": "http://127.0.0.1:13337/mcp",
+        "disabled": true
+      },
+      // =======================================================================
+      // Profile: offensive-c2 (Pentest/C2, dangerous, disabled by default)
+      // STRICT REQUIREMENT (NFR11): Requires --pentest flag AND valid consent
+      // file (consent/pentest-scope.json).
+      // =======================================================================
+      "sliver": {
+        "type": "local",
+        "command": [
+          "sliver-server"
+        ],
+        "disabled": true
+      },
+      "pentagi": {
+        "type": "remote",
+        "url": "http://127.0.0.1:8080/mcp",
+        "disabled": true
+      },
+      "strix": {
+        "type": "local",
+        "command": [
+          "strix",
+          "mcp"
+        ],
+        "disabled": true
+      },
+      "caldera": {
+        "type": "remote",
+        "url": "http://127.0.0.1:8888/mcp",
+        "disabled": true
+      },
+      "adaptixc2": {
+        "type": "local",
+        "command": ["adaptix-server"],
+        "disabled": true
+      },
+      "mythic": {
+        "type": "remote",
+        "url": "http://127.0.0.1:7443/mcp",
+        "disabled": true
+      },
+      "decepticon": {
+        "type": "local",
+        "command": ["decepticon"],
+        "disabled": true
+      },
+      "bunkerweb": {
+        "type": "remote",
+        "url": "http://127.0.0.1:8081/mcp",
+        "disabled": true
+      }
+    }
+  }
+}

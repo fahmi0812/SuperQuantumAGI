@@ -1,0 +1,10 @@
+{
+  "name": "superquantumagi",
+  "private": true,
+  "type": "module",
+  "description": "Non-invasive OpenCode harness. Tests import the implementation, not copied logic.",
+  "scripts": {
+    "test": "node --experimental-strip-types tests/suite.mjs",
+    "ci": "node ci/run-gates.mjs"
+  }
+}

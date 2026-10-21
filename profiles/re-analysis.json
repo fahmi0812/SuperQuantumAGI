@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "profile": "re-analysis",
+  "description": "Safe, defensive reverse engineering and binary analysis profile. Lazy on-demand activation upon reverse-engineering intent. NEVER enables offensive C2.",
+  "enabled": false,
+  "lazy": true,
+  "mcp_servers": [
+    "ghidra",
+    "jshook",
+    "idapro"
+  ],
+  "requires_consent": false,
+  "requires_pentest_flag": false,
+  "safety_level": "safe-inspection"
+}
