@@ -6,15 +6,30 @@ description: Runs sector work in a reviewable sequence: implement, check, then s
 # Subagent Driven Development
 
 Source: https://github.com/davila7/claude-code-templates
-Pin: # TODO: resolve pin
-License: MIT (davila7/claude-code-templates). Local summary, not a vendored copy.
+Pin: e7d17f93bb90d4f351733f06716fe92fdb25de28
+Commit-Date: 2026-10-21
+License: MIT. Local summary of the sequential review workflow. Not a vendored copy.
 
-## Method
+## Tujuan
 
-Use this when the next step depends on the previous result.
+Menyelesaikan pekerjaan yang langkahnya bergantung pada hasil langkah sebelumnya, dengan cek di tiap langkah.
 
-1. One sector subagent per step. Depth stays at one.
-2. Each step names the files it may change and the test that proves the step.
-3. A failed done-gate returns to re-plan. It is not marked done.
-4. After two consecutive failures, call the exception auditor. After three, stop.
-5. Synthesize only after the sequence has a green gate or an explicit halt.
+## Kapan dipakai
+
+Pakai saat implementasi, tes, dan review harus berurutan. Jangan pakai untuk item yang benar-benar independen.
+
+## Langkah
+
+1. Satu subagent sektor per langkah. Kedalaman tetap satu.
+2. Setiap langkah menyebut file yang boleh diubah dan tes yang membuktikan langkah itu.
+3. Done-gate gagal berarti re-plan, bukan ditandai selesai.
+4. Dua gagal berturut memanggil exception auditor. Tiga gagal menghentikan run.
+5. Synthesize hanya setelah gate hijau atau halt eksplisit.
+
+## Input / output
+
+Input: urutan langkah dan tes tiap langkah. Output: diff yang lolos gate, atau alasan halt.
+
+## Batasan
+
+Jangan melewati tes yang gagal. Jangan memperlebar blast radius tanpa consent.

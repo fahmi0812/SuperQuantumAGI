@@ -394,6 +394,72 @@ test("registry T1 skills exist as directories and fallback is manual", () => {
   assert.equal(fs.existsSync(path.join(root, ".opencode/skills/nia-oracle/SKILL.md")), true);
 });
 
+test("resolved pins are 40 hex and unresolved URLs stay honest", () => {
+  const resolved = [
+    "dispatching-parallel-agents",
+    "humanizer",
+    "rea",
+    "diagram-design",
+    "unslop",
+    "api-design",
+    "pageindex",
+  ];
+  for (const id of resolved) {
+    const text = fs.readFileSync(path.join(root, ".opencode/skills", id, "SKILL.md"), "utf8");
+    assert.match(text, /Pin: [0-9a-f]{40}/, id);
+    assert.equal(text.includes("# TODO: resolve pin"), false, id);
+  }
+  const penulis = fs.readFileSync(path.join(root, ".opencode/skills/penulis-ilmiah/SKILL.md"), "utf8");
+  const perf = fs.readFileSync(path.join(root, ".opencode/skills/full-performance-audit/SKILL.md"), "utf8");
+  assert.match(penulis, /URL: TBD/);
+  assert.match(penulis, /# TODO: resolve pin/);
+  assert.match(perf, /URL: TBD/);
+  assert.match(perf, /# TODO: resolve pin/);
+  assert.equal(resolveSkillInSector("coding", "rest api design").skillId, "api-design");
+  assert.equal(resolveSkillInSector("writing", "unslop this note").skillId, "unslop");
+  assert.equal(resolveSkillInSector("data-doc-cad", "pptx briefing").skillId, "pptx-official");
+  assert.equal(resolveSkillInSector("motion-media", "architecture diagram").skillId, "diagram-design");
+});
+
+test("node 20 is rejected by npm test and CI pins Node 22", () => {
+  const denied = spawnSync(process.execPath, ["ci/require-node.mjs", "v20.11.1"], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  assert.equal(denied.status, 1);
+  assert.match(denied.stderr, /Node v20\.11\.1 is below 22/);
+  assert.match(denied.stderr, /fails by design/);
+  const workflow = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
+  assert.match(workflow, /node-version: "22"/);
+  assert.equal(workflow.includes("promptfoo"), false);
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+  assert.match(pkg.scripts.test, /ci\/require-node\.mjs/);
+});
+
+test("offline eval configs exist and are not a fake green gate", () => {
+  const promptfoo = fs.readFileSync(path.join(root, "ci/promptfoo-config.yaml"), "utf8");
+  assert.match(promptfoo, /eval-sec-01/);
+  assert.match(promptfoo, /eval-sec-13/);
+  assert.match(promptfoo, /intent-registry-unique/);
+  assert.match(promptfoo, /Not a default CI gate/);
+  assert.match(promptfoo, /routing-provider\.sh/);
+  const deepteam = fs.readFileSync(path.join(root, "ci/deepteam.yaml"), "utf8");
+  assert.match(deepteam, /deepteam_target\.py/);
+  assert.match(deepteam, /not a default CI gate/i);
+  assert.equal(deepteam.includes("gpt-4"), false);
+  const gates = fs.readFileSync(path.join(root, "ci/run-gates.mjs"), "utf8");
+  assert.equal(gates.includes("promptfoo"), false);
+  assert.equal(gates.includes("deepteam"), false);
+  const routed = spawnSync("bash", ["ci/eval/routing-provider.sh", "unslop this release note and remove the robotic cadence"], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  assert.equal(routed.status, 0, routed.stderr);
+  const parsed = JSON.parse(routed.stdout);
+  assert.equal(parsed.sector, "writing");
+  assert.equal(parsed.liveModel, false);
+});
+
 test("quality loop calls root-cause gate only after done-gate passes", () => {
   const passed = runQualityLoop({
     taskId: "q-ok",

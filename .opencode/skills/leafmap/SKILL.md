@@ -6,8 +6,9 @@ description: Analyzes geospatial raster and vector data with leafmap-style map w
 # Leafmap
 
 Source: https://github.com/opengeos/leafmap
-Pin: # TODO: resolve pin
-License: Upstream pin unresolved. Local summary only. leafmap itself is a library pointer, not vendored here.
+Pin: ed1970dab154b5a5f65f7cf31a43acf35bb15e12
+Commit-Date: 2026-09-20
+License: MIT, confirmed via GitHub API on 2026-10-21. Local summary only. Do not vendor.
 
 ## Method
 

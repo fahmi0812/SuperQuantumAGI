@@ -6,7 +6,8 @@ description: Synthesizes a question across sources, separating claims, evidence,
 # Deep Research
 
 Source: https://github.com/davila7/claude-code-templates
-Pin: # TODO: resolve pin
+Pin: e7d17f93bb90d4f351733f06716fe92fdb25de28
+Commit-Date: 2026-10-21
 License: MIT (davila7/claude-code-templates). Local summary, not a vendored copy.
 
 ## Method

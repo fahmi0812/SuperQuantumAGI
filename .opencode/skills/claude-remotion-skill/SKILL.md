@@ -6,8 +6,9 @@ description: Builds programmatic React video with Remotion when the scene is com
 # Claude Remotion Skill
 
 Source: https://github.com/haidrrrry/claude-remotion-skill
-Pin: # TODO: resolve pin
-License: Upstream pin unresolved. Local summary only. Do not vendor remotion-dev/skills.
+Pin: 1dcbe5e3fc6cf970bd10d3cc05f0a8a5d19d0383
+Commit-Date: 2026-08-12
+License: MIT, confirmed via GitHub API on 2026-10-21. Local summary only. Do not vendor remotion-dev/skills.
 
 ## Method
 

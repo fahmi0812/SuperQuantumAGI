@@ -7,12 +7,29 @@ description: Reviews a diff for correctness, type safety, and regressions withou
 
 Source: https://github.com/mattpocock/skills
 Pin: d81f3a183412e71a5b1e84ca21bc1a35eea03a60
+Commit-Date: 2026-09-29
 License: MIT (mattpocock/skills). Local summary, not a vendored copy.
 
-## Method
+## Tujuan
 
-1. Review the diff that exists. Do not restyle unrelated files.
-2. Check types, error paths, and tests that should have changed with the behavior.
-3. Order findings by severity. Cite file and line.
-4. Distinguish a bug from a preference.
-5. Do not approve a change that only hides a symptom.
+Menilai diff yang ada untuk kebenaran, tipe, dan regresi, tanpa menulis ulang perubahan.
+
+## Kapan dipakai
+
+Pakai pada diff yang sudah ada. Jangan pakai untuk merapikan file yang tidak berubah.
+
+## Langkah
+
+1. Review diff yang ada. Jangan restyle file yang tidak terkait.
+2. Cek tipe, jalur error, dan tes yang seharusnya ikut berubah.
+3. Urutkan temuan menurut keparahan. Kutip file dan baris.
+4. Bedakan bug dari selera.
+5. Jangan menyetujui perubahan yang hanya menyembunyikan gejala.
+
+## Input / output
+
+Input: diff. Output: temuan berurutan, atau persetujuan yang menyebut tes yang dijalankan.
+
+## Batasan
+
+Bukan rewrite. Bukan daftar gaya tanpa dampak perilaku.

@@ -28,6 +28,9 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "matt-code-review", name: "Matt Code Review", intentKey: "strict_typescript_review", tier: "T1", description: "Code review with strict type safety" },
     { id: "tdd", name: "Test-Driven Development", intentKey: "test_first_implementation", tier: "T1", description: "Writes tests before implementation" },
     { id: "playwright-qa", name: "Playwright QA", intentKey: "browser_e2e_testing", tier: "T1", description: "End-to-end browser automation and testing" },
+    { id: "api-design", name: "API Design", intentKey: "rest_api_design", tier: "T1", description: "REST resource names, status codes, pagination, and versioning" },
+    { id: "contract-first", name: "Contract First", intentKey: "contract_before_implementation", tier: "T1", description: "Locks the API contract before implementation starts" },
+    { id: "eval-harness", name: "Eval Harness", intentKey: "eval_before_trust", tier: "T1", description: "Requires an eval set before an agent change is trusted" },
   ],
   "reverse-engineering": [
     { id: "reverse-skill", name: "Reverse Skill", intentKey: "re_router_primary", tier: "T1", description: "Primary router for binary and app decompilation" },
@@ -51,6 +54,9 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "gsap-skills", name: "GSAP Skills", intentKey: "web_gsap_animation", tier: "T1", description: "Interactive GSAP animations" },
     { id: "manim", name: "Manim", intentKey: "math_code_animation", tier: "T1", description: "Mathematical and programmatic Manim video" },
     { id: "hyperframes", name: "Hyperframes", intentKey: "generative_video_frames", tier: "T1", description: "Frame-based programmatic motion generation" },
+    { id: "diagram-design", name: "Diagram Design", intentKey: "html_svg_diagram_design", tier: "T1", description: "HTML and SVG diagrams from a named diagram type" },
+    { id: "deck-design", name: "Deck Design", intentKey: "consulting_slide_deck", tier: "T1", description: "Slide deck structure before any pptx bytes are written" },
+    { id: "json-render", name: "JSON Render", intentKey: "json_driven_ui_render", tier: "T1", description: "Renders a declared JSON spec instead of freehand UI" },
   ],
   "data-doc-cad": [
     { id: "markitdown", name: "Markitdown", intentKey: "convert_doc_to_markdown", tier: "T1", description: "Converts diverse office files to markdown" },
@@ -58,18 +64,21 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "xlsx-official", name: "Xlsx Official", intentKey: "generate_excel_spreadsheets", tier: "T1", description: "Generates Excel spreadsheets" },
     { id: "pdf-official", name: "Pdf Official", intentKey: "generate_pdf_reports", tier: "T1", description: "Generates styled PDF files" },
     { id: "text-to-cad", name: "Text-to-CAD", intentKey: "parametric_3d_cad", tier: "T1", description: "Generates 3D CAD models from text" },
+    { id: "pptx-official", name: "Pptx Official", intentKey: "generate_pptx_decks", tier: "T1", description: "Builds a pptx from an outline. Upstream Anthropic text is not vendored." },
+    { id: "pageindex", name: "PageIndex", intentKey: "index_long_documents", tier: "T1", description: "Builds a page tree for a long document before answering from it" },
   ],
   "research": [
     { id: "deep-research", name: "Deep Research", intentKey: "deep_multi_source_research", tier: "T1", description: "Synthesizes multi-source academic/web research" },
     { id: "deep-research-team", name: "Deep Research Team", intentKey: "collaborative_research_team", tier: "T1", description: "Team-based deep investigation" },
     { id: "hackathon-winner-thinking", name: "Hackathon Winner Thinking", intentKey: "hackathon_ideation_differentiation", tier: "T1", description: "High-impact ideation, prize criteria alignment, and rapid pitch structuring" },
-    { id: "nia-oracle", name: "Nia Oracle", intentKey: "nia_oracle_paired_research", tier: "T1", description: "Pointer to the nia research pair. Pin and license are unresolved; do not vendor." },
+    { id: "nia-oracle", name: "Nia Oracle", intentKey: "nia_oracle_paired_research", tier: "T1", description: "Pointer to the nia research pair. Pin is the davila7 SHA. Do not vendor the agent file." },
   ],
   "writing": [
     { id: "humanizer", name: "Humanizer", intentKey: "natural_human_writing", tier: "T1", description: "Polishes text to remove AI voice slop" },
     { id: "install-anti-slop", name: "Anti-Slop", intentKey: "strip_slop_buzzwords", tier: "T1", description: "Strips corporate AI filler words" },
     { id: "technical-writing", name: "Technical Writing", intentKey: "clear_software_documentation", tier: "T1", description: "Writes concise technical developer guides" },
     { id: "penulis-ilmiah", name: "Penulis Ilmiah", intentKey: "academic_paper_prose", tier: "T1", description: "Formal scientific writing in Indonesian and English" },
+    { id: "unslop", name: "Unslop", intentKey: "cut_ai_writing_tells", tier: "T1", description: "Cuts AI writing tells while keeping the original meaning" },
   ],
   "career": [
     { id: "ai-job-search", name: "AI Job Search", intentKey: "career_cv_interview_prep", tier: "T1", description: "Tailors CVs, cover letters, and interview coaching" },
@@ -101,7 +110,41 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
     if (normalized.includes("math") || normalized.includes("formula")) {
       return { skillId: "manim", status: "tie_break" };
     }
+    if (normalized.includes("diagram")) {
+      return { skillId: "diagram-design", status: "tie_break" };
+    }
+    if (normalized.includes("deck") || normalized.includes("slide")) {
+      return { skillId: "deck-design", status: "tie_break" };
+    }
+    if (normalized.includes("json-render") || normalized.includes("json render")) {
+      return { skillId: "json-render", status: "tie_break" };
+    }
     return { skillId: "claude-motion-design", status: "tie_break" };
+  }
+
+  if (sector === "data-doc-cad") {
+    if (normalized.includes("pptx") || normalized.includes("slide deck")) {
+      return { skillId: "pptx-official", status: "tie_break" };
+    }
+    if (normalized.includes("pageindex") || normalized.includes("long document")) {
+      return { skillId: "pageindex", status: "tie_break" };
+    }
+  }
+
+  if (sector === "writing" && normalized.includes("unslop")) {
+    return { skillId: "unslop", status: "tie_break" };
+  }
+
+  if (sector === "coding") {
+    if (normalized.includes("contract-first") || normalized.includes("openapi")) {
+      return { skillId: "contract-first", status: "tie_break" };
+    }
+    if (normalized.includes("api-design") || normalized.includes("rest api")) {
+      return { skillId: "api-design", status: "tie_break" };
+    }
+    if (normalized.includes("eval-harness") || normalized.includes("eval harness")) {
+      return { skillId: "eval-harness", status: "tie_break" };
+    }
   }
 
   if (sector === "reverse-engineering") {

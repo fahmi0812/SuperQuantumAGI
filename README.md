@@ -107,7 +107,7 @@ LiteLLM and jev-model-router have been completely removed and archived (Tier 3).
 
 - **Linux** (Ubuntu, Debian, Fedora, Arch, etc.)
 - **OpenCode V2**: `opencode --version`
-- **Node.js**: >= 22.x (with native TypeScript strip-types support). `node ci/run-gates.mjs` hard-fails below 22. There is no Node 20 transpile fallback.
+- **Node.js**: >= 22.x (native TypeScript strip-types). `npm test` and `node ci/run-gates.mjs` hard-fail below 22 with an explicit message. A machine whose default is Node 20 fails by design. There is no transpile fallback.
 - **Bubblewrap**: for local sandboxing (`sudo apt install bubblewrap` or `sudo pacman -S bubblewrap`)
 - **9router**: Connected natively in `~/.config/opencode/opencode.json` (OpenCode handles inference directly)
 
@@ -122,7 +122,9 @@ cd SuperQuantumAGI
 # Copy local environment template
 cp .env.example .env
 
-# Verify CI gates, license checks, and sandbox functionality
+# Verify CI gates, license checks, and sandbox functionality.
+# npm test refuses Node < 22 before the suite starts.
+npm test
 node ci/run-gates.mjs
 ```
 
@@ -168,5 +170,7 @@ node ci/run-gates.mjs
 - **Single-Writer Law**: Subagents write exclusively to `runtime/progress.{agent_id}.md`. Only the `synthesizer` subagent writes to `task_plan.md` and `findings.md`.
 - **NFR11 Authorization**: Offensive pentest operations require `--pentest` authorization and a non-example consent file (`consent/pentest-scope.json`). Do not commit live consent tokens or sensitive target scopes.
 - **Published docs**: `README.md`, `NOTICE`, `THIRD_PARTY_LICENSES`, and `docs/archive-alternatives.md` are the docs that belong in git. Local PRD/catalog dumps stay on disk and are gitignored.
-- **P2 catalog skills** (`diagram-design`, `deck-design`, `json-render`, ECC subset, `unslop`, `pptx-official`, `pageindex`) are not installed. Their source URLs were incomplete or truncated, so no pin or URL was invented.
+- **P2 skills now installed** (pointers, not vendored copies): `diagram-design`, `deck-design`, `json-render`, `pptx-official`, `pageindex`, `unslop`, and an ECC subset (`api-design`, `contract-first`, `eval-harness`). The other six ECC catalog names are not installed.
+- **Pins still unresolved:** `penulis-ilmiah` and `full-performance-audit` stay `URL: TBD` / `# TODO: resolve pin`. First-party OCH items that were never given a repository (`mongodb-ops`, `supabase-ops`, `vercel-ops`, and the other OCH TBD rows) were not invented.
+- **Offline eval:** `ci/promptfoo-config.yaml` and `ci/deepteam.yaml` are real caller configs. They are not the default CI gate. See `docs/eval-offline.md`. A missing promptfoo/deepteam install or a missing live model is `not run`, not a pass.
 

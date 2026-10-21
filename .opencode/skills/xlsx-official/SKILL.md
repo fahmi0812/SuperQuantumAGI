@@ -6,13 +6,30 @@ description: Generates a spreadsheet with named sheets, headers, and formulas ra
 # Xlsx Official
 
 Source: https://github.com/davila7/claude-code-templates
-Pin: # TODO: resolve pin
-License: Check ANTHROPIC_ATTRIBUTION before bundling upstream document-processing files. This repo keeps a local summary only.
+Pin: e7d17f93bb90d4f351733f06716fe92fdb25de28
+Commit-Date: 2026-10-21
+License: Pointer only. Upstream xlsx-official material is Anthropic-attribution. Do not vendor.
 
-## Method
+## Tujuan
 
-1. One sheet, one purpose. Name the header row.
-2. Prefer formulas for totals so the sheet stays auditable.
-3. Do not vendor upstream xlsx skill source until attribution is confirmed.
-4. Keep sample data obviously fake.
-5. Pin remains TODO.
+Membuat spreadsheet yang bisa diaudit: sheet bernama, header, dan formula.
+
+## Kapan dipakai
+
+Pakai saat angka harus bisa dihitung ulang. Jangan hardcode total jika formula bisa menyatakannya.
+
+## Langkah
+
+1. Satu sheet, satu tujuan. Namai baris header.
+2. Utamakan formula untuk total.
+3. Jangan vendor sumber upstream sampai atribusi dikonfirmasi.
+4. Data contoh harus jelas palsu.
+5. Simpan file sebagai artefak.
+
+## Input / output
+
+Input: nama sheet, header, dan rumus. Output: path xlsx.
+
+## Batasan
+
+Bukan salinan skrip office upstream.
