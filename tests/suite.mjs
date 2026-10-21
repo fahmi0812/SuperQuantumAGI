@@ -13,7 +13,8 @@ import {
   isOffensiveInvocation,
   verifyPentestAuthorization,
 } from "../harness/policy.cjs";
-import { runQualityLoop } from "../harness/quality-loop.ts";
+import { postPushFactSatisfied } from "../harness/post-push.ts";
+import { QUALITY_LOOP_ORDER, runQualityLoop } from "../harness/quality-loop.ts";
 import { evaluateRootCauseGate } from "../harness/root-cause-gate.ts";
 import { runInSandbox } from "../harness/sandbox/bwrap-runner.ts";
 import { applyShellCreateBefore, decideSectorShell } from "../harness/sandbox/sector-shell.cjs";
@@ -62,6 +63,82 @@ test("done-gate accepts only exit 0, non-empty artifacts, and green tests", () =
     testCommandExitCode: 1,
   });
   assert.equal(red.isDone, false);
+});
+
+test("done-gate rejects push and RELEASE claims without explicit FACT", () => {
+  const base = {
+    commandExitCode: 0,
+    expectedArtifacts: [path.join(root, "NOTICE")],
+    testsGreen: true,
+  };
+  const pushed = evaluateDoneGate({ ...base, pushRequested: true });
+  assert.equal(pushed.isDone, false);
+
+  const remoteOnly = evaluateDoneGate({
+    ...base,
+    pushRequested: true,
+    remoteShaOk: true,
+    facts: ["FACT: remote SHA abc"],
+  });
+  assert.equal(remoteOnly.isDone, false);
+
+  const silentNotConfigured = evaluateDoneGate({
+    ...base,
+    pushRequested: true,
+    remoteShaOk: true,
+    ciStatus: "NOT_CONFIGURED",
+    facts: ["FACT: remote SHA abc"],
+  });
+  assert.equal(silentNotConfigured.isDone, false);
+
+  const judgment = evaluateDoneGate({
+    ...base,
+    pushRequested: true,
+    remoteShaOk: true,
+    ciStatus: "GREEN",
+    facts: ["JUDGMENT: ci looks green", "FACT: remote SHA abc"],
+  });
+  assert.equal(judgment.isDone, false);
+
+  const explicit = evaluateDoneGate({
+    ...base,
+    pushRequested: true,
+    remoteShaOk: true,
+    ciStatus: "NOT_CONFIGURED",
+    facts: ["FACT: remote SHA abc", "FACT: ciStatus NOT_CONFIGURED"],
+  });
+  assert.equal(explicit.isDone, true);
+  assert.equal(postPushFactSatisfied({
+    remoteShaOk: true,
+    ciStatus: "NOT_CONFIGURED",
+    facts: ["FACT: remote SHA abc", "FACT: ciStatus NOT_CONFIGURED"],
+  }), true);
+
+  const releaseMissingScanner = evaluateDoneGate({
+    ...base,
+    verificationProfile: "RELEASE",
+    releaseGates: { typecheck: "PASS", tests: "PASS", build: "PASS" },
+  });
+  assert.equal(releaseMissingScanner.isDone, false);
+
+  const releaseScannerNotConfigured = evaluateDoneGate({
+    ...base,
+    verificationProfile: "RELEASE",
+    scannerStatus: "NOT_CONFIGURED",
+    releaseGates: { typecheck: "PASS", tests: "PASS", build: "PASS", scanner: "NOT_CONFIGURED" },
+  });
+  assert.equal(releaseScannerNotConfigured.isDone, false);
+
+  assert.deepEqual(QUALITY_LOOP_ORDER, [
+    "local-tests",
+    "scanner-if-release",
+    "commit",
+    "push",
+    "verify-remote-sha",
+    "verify-ci",
+    "fact-ledger",
+    "done",
+  ]);
 });
 
 test("anti-spin trips at hardcoded iteration 3 and audits after 2 failures", () => {
@@ -118,6 +195,14 @@ test("layer-0 slash commands early-exit and general code falls through", () => {
   assert.equal(routeLayer0("Refactor the database connection pool in TypeScript").matched, false);
   assert.equal(routeLayer0("commit push").sector, "coding");
   assert.equal(routeLayer0("commit push").complexity, "Low");
+  assert.equal(routeLayer0("commit push").qualityObligation, "post-push");
+  assert.equal(routeLayer0("git status").qualityObligation, "none");
+  assert.equal(routeLayer0("/verify-push").qualityObligation, "post-push");
+  assert.equal(routeLayer0("/blast-radius").slashOnly, true);
+  assert.equal(routeLayer0("/why").matched, true);
+  assert.equal(routeLayer0("/architect").matched, true);
+  assert.equal(routeLayer0("/create-verification-skill").matched, true);
+  assert.equal(routeLayer0("what is the blast radius of this diff").matched, false);
   assert.equal(routeLayer0("commit to a new design direction").matched, false);
 });
 
@@ -174,6 +259,9 @@ test("intent keys are unique inside each sector and ties resolve", () => {
   assert.equal(resolveSkillInSector("unknown-sector", "anything").skillId, "manual");
   assert.equal(resolveSkillInSector("coding", "no-such-intent").skillId, "manual");
   assert.equal(resolveSkillInSector("coding", "no-such-intent").status, "manual_fallback");
+  assert.equal(resolveSkillInSector("coding", "github_ci_ops").skillId, "gh-axi");
+  assert.equal(resolveSkillInSector("devops-infra-finance", "github_actions_ci").skillId, "gh-axi");
+  assert.equal(resolveSkillInSector("orchestration-quality", "agent_architecture_audit").skillId, "agent-architecture-audit");
 });
 
 test("triage parser keeps ReAnalysis and does not mark RE as pentest", () => {
@@ -351,12 +439,38 @@ test("plugin wraps sector shells and triages with the active model", () => {
   assert.equal(src.includes("session.hook(\"context\""), true);
   assert.equal(src.includes("session.generate"), false);
   assert.equal(src.includes("event.prompt.text ="), false);
+  assert.equal(src.includes("POST_PUSH_REMINDER"), true);
+  assert.match(
+    fs.readFileSync(path.join(root, "harness/post-push.ts"), "utf8"),
+    /post-push verification pending/,
+  );
   assert.equal(src.includes("superq-triage]-error"), false);
   assert.equal(src.includes("classifyDeterministic"), false);
   assert.equal(src.includes("litellm"), false);
   const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
   assert.equal(pkg.engines.node, ">=22");
   assert.equal(pkg.dependencies["@opencode/plugin"], "2.1.2");
+  const verification = fs.readFileSync(path.join(root, ".opencode/rules/01-verification.md"), "utf8");
+  for (const profile of ["FAST", "STANDARD", "UI", "SECURITY", "PERFORMANCE", "RELEASE"]) {
+    assert.match(verification, new RegExp(`## ${profile}`));
+  }
+  assert.match(verification, /NOT_CONFIGURED/);
+  assert.match(verification, /Anti-test-weakening/);
+  assert.equal(fs.existsSync(path.join(root, ".opencode/skills/gh-axi/SKILL.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opencode/commands/blast-radius.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opencode/commands/why.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opencode/commands/architect.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".opencode/skills/decision-log/scripts/log.sh")), true);
+  const logged = spawnSync("bash", [
+    path.join(root, ".opencode/skills/decision-log/scripts/log.sh"),
+    path.join(os.tmpdir(), `sqagi-decision-${Date.now()}.tsv`),
+    "parity",
+    "record fact",
+    "test",
+    "tests/suite.mjs",
+    "FACT: exit 0",
+  ], { encoding: "utf8" });
+  assert.equal(logged.status, 0);
 });
 
 test("pentest command no longer treats an example file as consent", () => {

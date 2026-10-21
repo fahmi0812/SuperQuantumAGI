@@ -11,7 +11,7 @@ SuperQuantumAGI does **NOT** modify, patch, replace, or wrap the OpenCode binary
 1. `.opencode/opencode.jsonc` (project configuration & MCP registration)
 2. `.opencode/agents/` (Orchestrator Core + 11 Sector Subagents + Synthesizer)
 3. `.opencode/skills/` (Domain-specific skills)
-4. `.opencode/commands/` (Slash commands: `/start`, `/status`, `/resume`, `/sync`, `/audit`, `/pentest`)
+4. `.opencode/commands/` (Slash commands: `/start`, `/status`, `/resume`, `/sync`, `/audit`, `/pentest`, `/verify-push`, plus slash-only manuals)
 5. `.opencode/plugins/` (Local plugin for bwrap sandboxing & single-writer enforcement)
 
 OpenCode can be updated or upgraded cleanly at any time without conflict.
@@ -51,7 +51,7 @@ User Prompt
           │  • Anti-race: subagents write strictly to `runtime/progress.{agent_id}.md`
           ▼
    [Quality Loop (2 Lapis)]
-          1. Unified Done-Gate: exit==0 AND target artifact exists AND tests green
+          1. Unified Done-Gate: exit==0 AND artifacts exist AND tests green AND post-push/RELEASE FACT gates when they apply
           2. Anti-Spin: hardcoded max_iterations=3 + circuit breaker
           3. Root-Cause Gate (RCG) + Scope Guard (SCG) + Consent Checkpoint (CCP)
           │
@@ -78,6 +78,10 @@ User Prompt
 11. **DevOps, Infra & Finance** (`sectors/devops-infra-finance`)
 
 ---
+
+## Verification
+
+Profiles, the post-push rule, and the FACT ledger are in [docs/verification.md](docs/verification.md). A push is not done until the remote SHA matches and CI is green, or CI is an explicit `FACT: ciStatus NOT_CONFIGURED`.
 
 ## Model Routing: Native 9router
 

@@ -1,20 +1,71 @@
 /**
  * SuperQuantumAGI - Unified Done-Gate
- * Deterministic quality gate replacing complex LLM-eval loops (PRD §5.1).
- *
- * DONE if and only if:
- *   1. exit_code === 0        (Command execution succeeded)
- *   2. target artifacts exist (Output files exist and are non-empty)
- *   3. tests green            (Relevant unit/integration test suite passed)
+ * Deterministic quality gate. A missing check is UNRUN, not PASS.
+ * NOT_CONFIGURED counts only when an explicit FACT row records it.
+ * JUDGMENT rows never override a failed or missing FACT.
  */
 
 import * as fs from "fs";
-import type { DoneGateInput, DoneGateResult } from "./io-schema/types.ts";
+import type { CiStatus, DoneGateInput, DoneGateResult, GateStatus } from "./io-schema/types.ts";
+
+const RELEASE_ACCOUNTED = ["typecheck", "tests", "build"] as const;
+
+export function factMatches(facts: string[] | undefined, pattern: RegExp): boolean {
+  return (facts ?? []).some((line) => {
+    const trimmed = line.trim();
+    return /^FACT:/i.test(trimmed) && pattern.test(trimmed);
+  });
+}
+
+function releaseGateStatus(input: DoneGateInput, name: string): GateStatus {
+  return input.releaseGates?.[name] ?? "UNRUN";
+}
+
+function pushBlocks(input: DoneGateInput): string[] {
+  if (!input.pushRequested) return [];
+  const reasons: string[] = [];
+  const remoteFact = factMatches(input.facts, /remote/i);
+  if (input.remoteShaOk !== true || !remoteFact) {
+    reasons.push("push requested without a remote SHA FACT");
+  }
+  if (input.ciStatus === "GREEN") {
+    if (!factMatches(input.facts, /\bci\b/i)) {
+      reasons.push("CI green is not recorded as a FACT");
+    }
+  } else if (input.ciStatus === "NOT_CONFIGURED") {
+    if (!factMatches(input.facts, /NOT_CONFIGURED/)) {
+      reasons.push("ciStatus NOT_CONFIGURED is not an explicit FACT");
+    }
+  } else {
+    reasons.push(`ciStatus is ${input.ciStatus ?? "UNRUN"} (expected GREEN or explicit NOT_CONFIGURED)`);
+  }
+  return reasons;
+}
+
+function releaseBlocks(input: DoneGateInput): string[] {
+  if (input.verificationProfile !== "RELEASE") return [];
+  const reasons: string[] = [];
+  const scanner = input.releaseGates?.scanner ?? input.scannerStatus ?? "UNRUN";
+  if (scanner !== "PASS") {
+    reasons.push(`RELEASE scanner is ${scanner}`);
+  }
+  for (const name of RELEASE_ACCOUNTED) {
+    const status = releaseGateStatus(input, name);
+    if (status === "PASS") continue;
+    if (
+      status === "NOT_CONFIGURED" &&
+      factMatches(input.facts, new RegExp(`NOT_CONFIGURED.*${name}|${name}.*NOT_CONFIGURED`, "i"))
+    ) {
+      continue;
+    }
+    reasons.push(`RELEASE gate ${name} is ${status}`);
+  }
+  return reasons;
+}
 
 export function evaluateDoneGate(input: DoneGateInput): DoneGateResult {
   const exitCodeOk = input.commandExitCode === 0;
 
-  // Check required artifacts
   const missingArtifacts: string[] = [];
   for (const artifact of input.expectedArtifacts) {
     if (input.actualArtifactsCheck) {
@@ -39,7 +90,6 @@ export function evaluateDoneGate(input: DoneGateInput): DoneGateResult {
 
   const artifactsExist = missingArtifacts.length === 0;
 
-  // Check tests
   let testsPassed = true;
   if (input.testCommandExitCode !== undefined && input.testCommandExitCode !== null) {
     testsPassed = input.testCommandExitCode === 0;
@@ -47,7 +97,8 @@ export function evaluateDoneGate(input: DoneGateInput): DoneGateResult {
     testsPassed = input.testsGreen;
   }
 
-  const isDone = exitCodeOk && artifactsExist && testsPassed;
+  const extra = [...pushBlocks(input), ...releaseBlocks(input)];
+  const isDone = exitCodeOk && artifactsExist && testsPassed && extra.length === 0;
 
   let failureReason: string | undefined;
   if (!isDone) {
@@ -55,6 +106,7 @@ export function evaluateDoneGate(input: DoneGateInput): DoneGateResult {
     if (!exitCodeOk) reasons.push(`Command exit code was ${input.commandExitCode} (expected 0)`);
     if (!artifactsExist) reasons.push(`Missing or empty target artifacts: [${missingArtifacts.join(", ")}]`);
     if (!testsPassed) reasons.push("Test suite did not pass (testsGreen is false)");
+    reasons.push(...extra);
     failureReason = reasons.join("; ");
   }
 
@@ -64,6 +116,9 @@ export function evaluateDoneGate(input: DoneGateInput): DoneGateResult {
     artifactsExist,
     missingArtifacts,
     testsPassed,
+    remoteShaOk: input.remoteShaOk,
+    ciStatus: input.ciStatus as CiStatus | undefined,
+    verificationProfile: input.verificationProfile,
     failureReason,
   };
 }

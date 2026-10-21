@@ -18,6 +18,10 @@ export type SectorID =
 
 export type ComplexityTier = "Low" | "High";
 export type ProfileTier = "Default" | "Pentest" | "ReAnalysis";
+export type QualityObligation = "none" | "post-push";
+export type VerificationProfile = "FAST" | "STANDARD" | "UI" | "SECURITY" | "PERFORMANCE" | "RELEASE";
+export type GateStatus = "PASS" | "FAIL" | "NOT_CONFIGURED" | "UNRUN";
+export type CiStatus = "GREEN" | "RED" | "PENDING" | "NOT_CONFIGURED" | "UNRUN";
 
 export interface Layer0Decision {
   matched: boolean;
@@ -27,6 +31,10 @@ export interface Layer0Decision {
   complexity?: ComplexityTier;
   profile?: ProfileTier;
   matchedPattern?: string;
+  /** Set on push routes. Low complexity does not waive this. */
+  qualityObligation?: QualityObligation;
+  /** Slash-only manuals must not be selected by keyword regex. */
+  slashOnly?: boolean;
 }
 
 export interface Layer1TriageOutput {
@@ -47,6 +55,14 @@ export interface DoneGateInput {
   testCommandExitCode?: number | null;
   testsGreen?: boolean;
   actualArtifactsCheck?: (path: string) => boolean;
+  verificationProfile?: VerificationProfile;
+  pushRequested?: boolean;
+  remoteShaOk?: boolean;
+  ciStatus?: CiStatus;
+  scannerStatus?: GateStatus;
+  releaseGates?: Record<string, GateStatus>;
+  /** Ledger rows. Only lines starting with `FACT:` are blocking evidence. */
+  facts?: string[];
 }
 
 export interface DoneGateResult {
@@ -55,6 +71,9 @@ export interface DoneGateResult {
   artifactsExist: boolean;
   missingArtifacts: string[];
   testsPassed: boolean;
+  remoteShaOk?: boolean;
+  ciStatus?: CiStatus;
+  verificationProfile?: VerificationProfile;
   failureReason?: string;
 }
 
