@@ -27,6 +27,8 @@ const MANUAL_SLASH = new Set([
   "/improve-codebase-architecture",
   "/arena",
   "/demo-video",
+  "/smartdoc",
+  "/smartbook",
 ]);
 
 const REGEX_RULES: RegexRule[] = [
@@ -60,7 +62,7 @@ const REGEX_RULES: RegexRule[] = [
   },
   // Sector 7: Data / Document / CAD
   {
-    pattern: /\b(docx|pptx|xlsx|pdf-parse|markitdown|text-to-cad|freecad|step-file|n8n-workflow)\b/i,
+    pattern: /\b(docx|pptx|xlsx|pdf-parse|markitdown|text-to-cad|freecad|step-file|n8n-workflow|smartdoc|smartbook)\b/i,
     sector: "data-doc-cad",
     defaultComplexity: "Low",
     defaultProfile: "Default",
@@ -159,6 +161,26 @@ export function routeLayer0(prompt: string): Layer0Decision {
           complexity: "Low",
           profile: "Default",
           qualityObligation: "post-push",
+          slashOnly: true,
+        };
+      case "/smartdoc":
+        return {
+          matched: true,
+          type: "slash_command",
+          command: "/smartdoc",
+          sector: "data-doc-cad",
+          complexity: "Low",
+          profile: "Default",
+          slashOnly: true,
+        };
+      case "/smartbook":
+        return {
+          matched: true,
+          type: "slash_command",
+          command: "/smartbook",
+          sector: "data-doc-cad",
+          complexity: "Low",
+          profile: "Default",
           slashOnly: true,
         };
       default:

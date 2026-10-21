@@ -202,6 +202,10 @@ test("layer-0 slash commands early-exit and general code falls through", () => {
   assert.equal(routeLayer0("/why").matched, true);
   assert.equal(routeLayer0("/architect").matched, true);
   assert.equal(routeLayer0("/create-verification-skill").matched, true);
+  assert.equal(routeLayer0("/smartdoc").sector, "data-doc-cad");
+  assert.equal(routeLayer0("/smartdoc").slashOnly, true);
+  assert.equal(routeLayer0("/smartbook").sector, "data-doc-cad");
+  assert.equal(routeLayer0("/smartbook").slashOnly, true);
   assert.equal(routeLayer0("what is the blast radius of this diff").matched, false);
   assert.equal(routeLayer0("commit to a new design direction").matched, false);
 });
@@ -253,6 +257,8 @@ test("intent keys are unique inside each sector and ties resolve", () => {
     const keys = skills.map((skill) => skill.intentKey);
     assert.equal(new Set(keys).size, keys.length, sector);
   }
+  const allKeys = Object.values(SECTOR_SKILL_REGISTRY).flatMap((skills) => skills.map((s) => s.intentKey));
+  assert.equal(new Set(allKeys).size, allKeys.length, "all intent keys must be globally unique");
   assert.equal(resolveSkillInSector("motion-media", "react remotion video").skillId, "claude-remotion-skill");
   assert.equal(resolveSkillInSector("reverse-engineering", "android apk frida").skillId, "hypeking");
   assert.equal(resolveSkillInSector("unknown-sector", "anything").status, "manual_fallback");
@@ -262,6 +268,17 @@ test("intent keys are unique inside each sector and ties resolve", () => {
   assert.equal(resolveSkillInSector("coding", "github_ci_ops").skillId, "gh-axi");
   assert.equal(resolveSkillInSector("devops-infra-finance", "github_actions_ci").skillId, "gh-axi");
   assert.equal(resolveSkillInSector("orchestration-quality", "agent_architecture_audit").skillId, "agent-architecture-audit");
+  assert.equal(resolveSkillInSector("data-doc-cad", "smartdoc_job").skillId, "smartdoc");
+  assert.equal(resolveSkillInSector("data-doc-cad", "smartbook_ingest").skillId, "smartbook-ingest");
+  assert.equal(resolveSkillInSector("data-doc-cad", "pelajari modul").skillId, "smartbook-ingest");
+  assert.equal(resolveSkillInSector("data-doc-cad", "kerjakan soal").skillId, "smartdoc");
+  assert.equal(resolveSkillInSector("devops-infra-finance", "mongodb_ops").skillId, "mongodb-ops");
+  assert.equal(resolveSkillInSector("devops-infra-finance", "supabase_ops").skillId, "supabase-ops");
+  assert.equal(resolveSkillInSector("devops-infra-finance", "vercel_ops").skillId, "vercel-ops");
+  assert.equal(resolveSkillInSector("devops-infra-finance", "automation_audit_ops").skillId, "automation-audit-ops");
+  assert.equal(resolveSkillInSector("coding", "mongodb_schema_ops").skillId, "mongodb-ops");
+  assert.equal(resolveSkillInSector("coding", "supabase_backend_ops").skillId, "supabase-ops");
+  assert.equal(resolveSkillInSector("coding", "vercel_deploy_ops").skillId, "vercel-ops");
 });
 
 test("triage parser keeps ReAnalysis and does not mark RE as pentest", () => {
@@ -624,6 +641,50 @@ test("quality loop calls root-cause gate only after done-gate passes", () => {
   assert.equal(failedGate.done.isDone, false);
   assert.equal(failedGate.rootCause, null);
   assert.equal(typeof evaluateRootCauseGate, "function");
+});
+
+test("smartdoc root resolves explicit, SUPERQ_SMARTDOC, OPENCODE_SMARTDOC, and default", () => {
+  const cli = path.join(root, "harness/smartdoc/cli.mjs");
+
+  // 1. Explicit --root
+  const explicit = spawnSync("node", [cli, "status", "--root", "/tmp/explicit-test", "--json"], { encoding: "utf8" });
+  assert.equal(explicit.status, 0);
+  const explicitJson = JSON.parse(explicit.stdout);
+  assert.equal(explicitJson.root, "/tmp/explicit-test");
+
+  // 2. SUPERQ_SMARTDOC env
+  const superq = spawnSync("node", [cli, "status", "--json"], {
+    encoding: "utf8",
+    env: { ...process.env, SUPERQ_SMARTDOC: "/tmp/superq-test", OPENCODE_SMARTDOC: "/tmp/opencode-test" },
+  });
+  assert.equal(superq.status, 0);
+  const superqJson = JSON.parse(superq.stdout);
+  assert.equal(superqJson.root, "/tmp/superq-test");
+
+  // 3. OPENCODE_SMARTDOC fallback
+  const opencodeEnv = { ...process.env };
+  delete opencodeEnv.SUPERQ_SMARTDOC;
+  opencodeEnv.OPENCODE_SMARTDOC = "/tmp/opencode-fallback";
+  const opencode = spawnSync("node", [cli, "status", "--json"], {
+    encoding: "utf8",
+    env: opencodeEnv,
+  });
+  assert.equal(opencode.status, 0);
+  const opencodeJson = JSON.parse(opencode.stdout);
+  assert.equal(opencodeJson.root, "/tmp/opencode-fallback");
+
+  // 4. Default ~/SmartDoc
+  const cleanEnv = { ...process.env, HOME: "/tmp/fake-home" };
+  delete cleanEnv.SUPERQ_SMARTDOC;
+  delete cleanEnv.OPENCODE_SMARTDOC;
+  const def = spawnSync("node", [cli, "status", "--json"], {
+    encoding: "utf8",
+    env: cleanEnv,
+  });
+  assert.equal(def.status, 0);
+  const defJson = JSON.parse(def.stdout);
+  assert.equal(defJson.root, "/tmp/fake-home/SmartDoc");
+  assert.equal(defJson.capabilities.TXT_WRITE, "READY");
 });
 
 for (const item of tests) {
