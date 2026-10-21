@@ -13,6 +13,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bubblewrap
+      - name: Allow bwrap user namespaces
+        run: |
+          set -euo pipefail
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
+          if [ -e /proc/sys/kernel/unprivileged_userns_clone ]; then
+            sudo sysctl -w kernel.unprivileged_userns_clone=1
+          fi
+          bwrap --ro-bind /usr /usr --ro-bind /bin /bin --proc /proc --dev /dev --unshare-net --die-with-parent /bin/echo SANDBOX_CI_OK
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
