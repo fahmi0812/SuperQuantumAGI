@@ -1,180 +1,140 @@
 # SuperQuantumAGI
 
-> **SuperQuantumAGI** — Lean, powerful, multi-sector Agentic Orchestrator harness installed as a **pure non-invasive layer on top of OpenCode**.
-> **Target:** OpenCode (V2) | **Operator:** Fahmi Harun ([kuker24](https://github.com/kuker24)) | Self-hosted / Local-first.
+Harness orkestrasi multi-agen untuk [OpenCode](https://github.com/opencode-ai/opencode) yang menambahkan pemisahan tugas berbasis sektor, isolasi proses sandbox, dan gerbang verifikasi kualitas deterministik—tanpa memodifikasi runtime inti OpenCode.
 
 ---
 
-## Safety Rule #1: OpenCode Remains 100% Vanilla
+## Prinsip Desain
 
-SuperQuantumAGI does **NOT** modify, patch, replace, or wrap the OpenCode binary or runtime. It installs exclusively through standard OpenCode extension points:
-1. `.opencode/opencode.jsonc` (project configuration & MCP registration)
-2. `.opencode/agents/` (Orchestrator Core + 11 Sector Subagents + Synthesizer)
-3. `.opencode/skills/` (Domain-specific skills)
-4. `.opencode/commands/` (Slash commands: `/start`, `/status`, `/resume`, `/sync`, `/audit`, `/pentest`, `/verify-push`, plus slash-only manuals)
-5. `.opencode/plugins/` (Local plugin for bwrap sandboxing & single-writer enforcement)
-
-OpenCode can be updated or upgraded cleanly at any time without conflict.
+1. **Non-Invasif:** Berjalan murni di atas ekstensi resmi OpenCode (`.opencode/agents/`, `.opencode/skills/`, `.opencode/commands/`, `.opencode/plugins/`). Biner dan runtime OpenCode tetap 100% bawaan pabrik dan bebas diperbarui kapan saja.
+2. **Routing Bertingkat (Zero-LLM First):** Perintah slash dan pola instruksi umum diproses langsung oleh Layer-0 tanpa membuang token LLM. Tugas kompleks diklasifikasikan ke sektor yang relevan dengan intent 1-ke-1.
+3. **Isolasi Proses (Sandbox):** Eksekusi perintah shell lokal dibatasi menggunakan Linux Bubblewrap (`bwrap`) untuk membatasi akses filesystem dan network sesuai kebutuhan tugas.
+4. **Koordinasi Single-Writer:** Sub-agen hanya menulis laporan progres ke berkas masing-masing (`runtime/progress.<subagent>.md`). Penggabungan hasil ke dokumen utama (`task_plan.md` dan `findings.md`) hanya dikerjakan oleh Synthesizer untuk mencegah race condition.
+5. **Verifikasi Terukur (Done-Gate):** Tugas baru dianggap selesai jika memenuhi fakta konkret: exit code 0, artifak terbukti ada, dan pengujian hijau. Setelah `git push`, status CI diperiksa langsung sebelum klaim selesai.
 
 ---
 
-## Attributions & Third-Party Credits
+## Alur Kerja Sistem
 
-- **Crawl4AI Attribution:** This product includes software developed by UncleCode (https://github.com/unclecode/crawl4ai).
-- **Serena / SolidLSP:** External MCP interface to Serena (GPL-3.0-or-later) by Jain & Panchenko IT-Berater Partnerschaft (Oraios AI). Not vendored.
-- **DeusData Codebase Memory MCP:** MIT License, Copyright (c) 2025 DeusData.
-- **Context7:** MIT License, Copyright (c) 2021 Upstash, Inc.
-- **shadcn:** MIT License, Copyright (c) 2023 shadcn.
-- **Claude Code Templates:** MIT License, Copyright (c) 2025 Daniel (San) Ávila.
-
-See `NOTICE` and `THIRD_PARTY_LICENSES` for full details.
-
----
-
-## Architecture Overview
-
-```
-User Prompt
+```text
+Instruksi Pengguna
     │
     ▼
-[Layer-0 Zero-LLM]  (Slash command / regex keyword match, 0 tokens)
+[Layer-0: Deterministic Router]  ── (Slash command / keyword regex, 0 token)
     │
     ▼
-[Layer-1 Triage]     (Classify to 1 of 11 sectors + complexity Low|High + profile Default|Pentest)
+[Layer-1: Triage Sektor]         ── (Klasifikasi ke 1 dari 11 sektor + kompleksitas)
     │
-    ├─ complexity: Low  ──► Fast-Path (1 subagent)
-    └─ complexity: High ──► Fan-Out (Multi-subagent per sector)
+    ├─ Rendah ──► Jalur Cepat (1 sub-agen)
+    └─ Tinggi ──► Pembagian Tugas Antar Sektor
           │
           ▼
-   [Layer-2 Sector Subagent] (Picks 5-8 Tier 1 skills via 1-to-1 Intent Registry)
-          │  • Sandbox: local bwrap / Docker
-          │  • Anti-race: subagents write strictly to `runtime/progress.{agent_id}.md`
+   [Layer-2: Sub-agen Sektor]    ── (Memilih skill Tier-1 sesuai kebutuhan)
+          │  • Dijalankan dalam sandbox bwrap lokal
+          │  • Menulis berkas progres independen
           ▼
-   [Quality Loop (2 Lapis)]
-          1. Unified Done-Gate: exit==0 AND artifacts exist AND tests green AND post-push/RELEASE FACT gates when they apply
-          2. Anti-Spin: hardcoded max_iterations=3 + circuit breaker
-          3. Root-Cause Gate (RCG) + Scope Guard (SCG) + Consent Checkpoint (CCP)
-          │
+   [Loop Verifikasi Kualitas]
+          • Done-Gate: Exit code 0 + pengujian unit lulus
+          • Anti-Spin Circuit Breaker: Maksimal 3 iterasi perbaikan
+          • Root-Cause Gate: Mencegah tambal-sulam gejala bug
           ▼
    [Synthesizer]
-          Sole authorized writer of `task_plan.md` and `findings.md`
-          │
-          ▼
-     Final Result
+          Mengagregasikan seluruh temuan ke task_plan.md & findings.md
 ```
-
-### The 11 Sectors
-
-1. **Orchestration & Quality** (`sectors/orchestration-quality`)
-2. **Coding, Engineering & Mobile** (`sectors/coding`)
-3. **Reverse Engineering** (`sectors/reverse-engineering`)
-4. **Keamanan, Pentest & C2** (`sectors/security-pentest`)
-5. **OSINT & Geospatial** (`sectors/osint`)
-6. **Desain, Motion & Media** (`sectors/motion-media`)
-7. **Data, Dokumen, CAD & Otomasi** (`sectors/data-doc-cad`)
-8. **Riset & Ideasi** (`sectors/research` — includes `hackathon-winner-thinking`)
-9. **Penulisan & Produktivitas** (`sectors/writing`)
-10. **Karier** (`sectors/career`)
-11. **DevOps, Infra & Finance** (`sectors/devops-infra-finance`)
 
 ---
 
-## Verification
+## Cakupan 11 Sektor
 
-Profiles, the post-push rule, and the FACT ledger are in [docs/verification.md](docs/verification.md). A push is not done until the remote SHA matches and CI is green, or CI is an explicit `FACT: ciStatus NOT_CONFIGURED`.
-
-## Model Routing: Native 9router
-
-All model requests are handled natively by OpenCode via **9router** (configured globally in `~/.config/opencode/opencode.json`).
-There is **no custom proxy, no LiteLLM gateway, and no custom router layer**.
-LiteLLM and jev-model-router have been completely removed and archived (Tier 3).
-
----
-
-## MCP Profiles
-
-- **Core-Active (Enabled by default):**
-  - `codebase-memory-mcp` (Local graph code intelligence)
-  - `context7` (Live documentation endpoint)
-  - `shadcn@4.22.1` (Component generation & design system). Pinned in `.opencode/opencode.jsonc`. Historical notes that mention v4.21.1 are not the runtime pin.
-- **`re-analysis` (Safe RE profile, lazy on-demand, disabled by default):**
-  - `ghidra`, `jshook`, `idapro`
-- **`offensive-c2` (Offensive profile, disabled by default):**
-  - `sliver`, `adaptixc2`, `pentagi`, `strix`, `caldera`, `mythic`, `decepticon`, `bunkerweb`
-  - **MANDATORY:** Requires an explicit `--pentest` authorization marker and a valid non-example consent file (`consent/pentest-scope.json`). `consent/*.example.*` is rejected. Without both, offensive MCP servers stay disabled and offensive executables are denied (NFR11). A search or read that merely mentions those tool names is not an offensive launch.
+| Sektor | Fokus Tugas | Kemampuan Utama |
+|---|---|---|
+| **01. Orchestration & Quality** | Perencanaan, evaluasi loop, done-gate | Multi-agent fanout, anti-spin, quality gates |
+| **02. Coding & Engineering** | Pengembangan software, bug fixing, review | TDD, API design, contract-first, code review, debugging |
+| **03. Reverse Engineering** | Analisis biner dan aplikasi lokal | Format inspeksi, dekompilasi native, analisis APK |
+| **04. Keamanan & Pentest** | Audit keamanan lokal berbasis izin (NFR11) | Pemetaan kerentanan statis, sanitasi input, audit dependensi |
+| **05. OSINT & Geospasial** | Analisis data spasial dan citra terbuka | Pengolahan koordinat, metadata citra, peta vektor/raster |
+| **06. Motion & Media** | Pembuatan media dan animasi terprogram | Render HTML/CSS motion, diagram SVG/HTML, infografis |
+| **07. Dokumen, Data & CAD** | Pemrosesan dokumen terstruktur dan CAD | Ekstraksi PDF/DOCX (SmartDoc), SmartBook ingest, Text-to-CAD |
+| **08. Riset & Analisis** | Sintesis multi-sumber dan tinjauan literatur | Pemetaan studi, pembobotan bukti, perbandingan teknis |
+| **09. Penulisan Teknis** | Dokumentasi teknis dan panduan sistem | Panduan API, perbaikan tata bahasa langsung tanpa filler |
+| **10. Karier** | Penyesuaian CV dan panduan teknis | Penataan portofolio teknis dan persiapan teknis |
+| **11. DevOps, Infra & Finansial** | Infrastruktur, pipeline CI/CD, dan basis data | GitHub Actions (gh-axi), MongoDB, Supabase, Vercel, audit performa |
 
 ---
 
-## Getting Started & Multi-PC Setup
+## Mesin Mandiri (Deterministic Tools)
 
-### 1. Prerequisites on Target Machine
+Selain pemodelan LLM, repositori ini memuat harness mandiri yang berjalan secara lokal:
 
-- **Linux** (Ubuntu, Debian, Fedora, Arch, etc.)
-- **OpenCode V2**: `opencode --version`
-- **Node.js**: >= 22.x (native TypeScript strip-types). `npm test` and `node ci/run-gates.mjs` hard-fail below 22 with an explicit message. A machine whose default is Node 20 fails by design. There is no transpile fallback.
-- **Bubblewrap**: for local sandboxing (`sudo apt install bubblewrap` or `sudo pacman -S bubblewrap`)
-- **9router**: Connected natively in `~/.config/opencode/opencode.json` (OpenCode handles inference directly)
-
-### 2. Fresh Installation on Another PC
-
-Clone the repository and prepare the local environment:
-
-```bash
-git clone https://github.com/kuker24/SuperQuantumAGI.git
-cd SuperQuantumAGI
-
-# Copy local environment template
-cp .env.example .env
-
-# Verify CI gates, license checks, and sandbox functionality.
-# npm test refuses Node < 22 before the suite starts.
-npm test
-node ci/run-gates.mjs
-```
-
-Launch OpenCode inside the repository root:
-
-```bash
-opencode
-```
-
-Verify MCP server connection statuses:
-
-```bash
-opencode mcp list
-```
-
-Expected output:
-- `✓ codebase-memory-mcp  connected`
-- `✓ context7             connected`
-- `✓ shadcn               connected`
-- All other profiles (`ghidra`, `sliver`, `caldera`, `adaptixc2`, etc.) remain `disabled`.
+* **SmartDoc & SmartBook (`harness/smartdoc/`)**: Ekstraksi teks native (DOCX, PDF, gambar), audit kemiripan n-gram lokal terhadap korpus dokumen, serta penyusunan basis pengetahuan lokal tanpa modifikasi global.
+* **Codebase Memory (`codebase-memory-mcp`)**: Pengindeksan graf arsitektur kode lokal untuk membaca dependensi, modul, dan call graph.
+* **Context7**: Pencarian referensi sintaks dokumentasi pustaka langsung dari sumber terverifikasi.
 
 ---
 
-## Maintenance & Evolution Guide
+## Keamanan & Sandboxing
 
-### 1. Updating the Harness
-When pulling changes from the repository:
-```bash
-git pull origin main
-node ci/run-gates.mjs
-```
+* **Isolasi Eksekusi:** Perintah kerja dijalankan di lingkungan Linux Bubblewrap (`bwrap`) untuk mencegah modifikasi sistem yang tidak disengaja.
+* **Gerbang Izin Khusus (NFR11):** Perangkat uji keamanan ofensif berada dalam profil non-aktif secara default. Penggunaannya mewajibkan token izin eksplisit dan dokumen batasan cakupan (`consent/pentest-scope.json`). File contoh (`.example.json`) otomatis ditolak oleh sistem.
+* **Perlindungan Kredensial:** Seluruh konfigurasi dan skill dilarang mencetak rahasia produksi atau connection string.
 
-### 2. Adding / Updating Skills
-1. Add new skill definitions to `.opencode/skills/<skill-id>/SKILL.md`.
-2. Register the skill's 1-to-1 intent key in `routing/intent-registry/index.ts` under its sector.
-3. Ensure no two active skills in the same sector share the same intent key.
-4. If adding new routing test cases, add them to `eval/golden-set-routing.json`.
-5. Run `node ci/run-gates.mjs` to verify routing accuracy (must remain >= 90%).
+---
 
-### 3. Safety & Hygiene Invariants
-- **Vanilla OpenCode**: Never patch OpenCode binaries or runtime files. Keep all custom logic in `.opencode/`, `harness/`, `routing/`, and `profiles/`.
-- **License Hygiene**: Never vendor copyleft (GPL/AGPL) code directly into the repository. Keep external tools as external pointers or detached network endpoints.
-- **Single-Writer Law**: Subagents write exclusively to `runtime/progress.{agent_id}.md`. Only the `synthesizer` subagent writes to `task_plan.md` and `findings.md`.
-- **NFR11 Authorization**: Offensive pentest operations require `--pentest` authorization and a non-example consent file (`consent/pentest-scope.json`). Do not commit live consent tokens or sensitive target scopes.
-- **Published docs**: `README.md`, `NOTICE`, `THIRD_PARTY_LICENSES`, and `docs/archive-alternatives.md` are the docs that belong in git. Local PRD/catalog dumps stay on disk and are gitignored.
-- **P2 skills now installed** (pointers, not vendored copies): `diagram-design`, `deck-design`, `json-render`, `pptx-official`, `pageindex`, `unslop`, and an ECC subset (`api-design`, `contract-first`, `eval-harness`). The other six ECC catalog names are not installed.
-- **Pins still unresolved:** `penulis-ilmiah` and `full-performance-audit` stay `URL: TBD` / `# TODO: resolve pin`. First-party OCH items that were never given a repository (`mongodb-ops`, `supabase-ops`, `vercel-ops`, and the other OCH TBD rows) were not invented.
-- **Offline eval:** `ci/promptfoo-config.yaml` and `ci/deepteam.yaml` are real caller configs. They are not the default CI gate. See `docs/eval-offline.md`. A missing promptfoo/deepteam install or a missing live model is `not run`, not a pass.
+## Persyaratan Sistem
 
+* **OS:** Linux (Ubuntu, Debian, Fedora, Arch, dll.)
+* **Node.js:** Versi 22.x atau lebih baru (menggunakan native TypeScript strip-types).
+* **OpenCode:** Versi 2.x
+* **Bubblewrap:** Terpasang pada sistem (`sudo apt install bubblewrap` / `sudo pacman -S bubblewrap`).
+* **Koneksi Model:** Konfigurasi gateway model (mis. 9router) pada `~/.config/opencode/opencode.json`.
+
+---
+
+## Memulai Cepat
+
+1. **Kloning repositori dan persiapkan berkas lingkungan:**
+   ```bash
+   git clone https://github.com/kuker24/SuperQuantumAGI.git
+   cd SuperQuantumAGI
+   cp .env.example .env
+   ```
+
+2. **Jalankan verifikasi gerbang lokal:**
+   ```bash
+   npm test
+   node ci/run-gates.mjs
+   ```
+
+3. **Jalankan OpenCode di dalam direktori repositori:**
+   ```bash
+   opencode
+   ```
+
+4. **Verifikasi status koneksi MCP:**
+   ```bash
+   opencode mcp list
+   ```
+   Server utama (`codebase-memory-mcp`, `context7`, `shadcn`) akan berstatus `connected`.
+
+---
+
+## Verifikasi Kualitas & CI
+
+SuperQuantumAGI menerapkan aturan verifikasi berbasis bukti:
+* Setiap pengujian dijalankan lokal melalui `npm test` dan `node ci/run-gates.mjs`.
+* Riwayat keputusan dicatat secara terstruktur untuk audit operasional.
+* Detail profil verifikasi dan aturan pasca-push tersedia di [docs/verification.md](docs/verification.md).
+
+---
+
+## Atribusi & Lisensi
+
+Repositori ini menyertakan dan mengintegrasikan perangkat pihak ketiga dengan atribusi resmi:
+- **Crawl4AI Attribution:** Menggunakan komponen yang dikembangkan oleh UncleCode (https://github.com/unclecode/crawl4ai).
+- **Serena / SolidLSP:** Antarmuka eksternal MCP untuk Serena (GPL-3.0-or-later) oleh Jain & Panchenko IT-Berater Partnerschaft (Oraios AI). Tidak di-vendor ke dalam repositori.
+- **DeusData Codebase Memory MCP:** Hak Cipta (c) 2025 DeusData (Lisensi MIT).
+- **Context7:** Hak Cipta (c) 2021 Upstash, Inc. (Lisensi MIT).
+- **shadcn/ui:** Hak Cipta (c) 2023 shadcn (Lisensi MIT).
+- **Claude Code Templates:** Hak Cipta (c) 2025 Daniel (San) Ávila (Lisensi MIT).
+
+Rincian lengkap lisensi dan hak cipta tercantum pada berkas `NOTICE` dan `THIRD_PARTY_LICENSES`.
