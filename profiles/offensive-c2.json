@@ -16,6 +16,7 @@
   ],
   "requires_consent": true,
   "requires_pentest_flag": true,
+  "consent_file": "consent/pentest-scope.json",
   "consent_file_schema": "consent/pentest-scope.example.json",
   "safety_level": "controlled-authorization-only"
 }

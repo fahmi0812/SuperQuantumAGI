@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.osint.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **OSINT & Geospatial Sector Subagent** (Sector 5).

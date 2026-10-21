@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.orchestration-quality.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Orchestration & Quality Sector Subagent** (Sector 1).

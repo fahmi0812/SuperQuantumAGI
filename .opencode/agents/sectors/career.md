@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.career.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Career Strategy Sector Subagent** (Sector 10).

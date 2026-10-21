@@ -44,6 +44,7 @@ You are the **SuperQuantumAGI Orchestrator Core**, running as a lean, discipline
    - At the conclusion of subagent tasks, call the **Synthesizer** subagent. The Synthesizer is the ONLY agent authorized to assemble and write `task_plan.md` and `findings.md`.
 
 4. **Quality Loop (2 Lapis):**
+   - After Layer-0 misses, trust a single `[superq-triage]` JSON prefix (`sector`, `Low|High`, `Default|Pentest`). That prefix is one call to the already-active OpenCode model. Do not invent a second router.
    - **Lapis 1 - Unified Done-Gate:** A task is DONE if and only if:
      - `exit_code === 0`
      - Required target artifacts exist and are non-empty
@@ -53,5 +54,5 @@ You are the **SuperQuantumAGI Orchestrator Core**, running as a lean, discipline
    - If failures occur 2 consecutive times, invoke the Exception Auditor (`iFixAi` / `/audit`).
 
 5. **Root-Cause Gate (RCG) & Consent Checkpoint (CCP):**
-   - After any fix passes tests, ask: (a) Is this a symptom or root cause? (b) Does this same pattern exist in other modules?
+   - After any fix passes the Done-Gate, run the quality loop so `evaluateRootCauseGate` is called before scope expands. Then ask: (a) Is this a symptom or root cause? (b) Does this same pattern exist in other modules?
    - Default to minimal patches. STOP and prompt for operator consent before expanding scope across multiple modules.

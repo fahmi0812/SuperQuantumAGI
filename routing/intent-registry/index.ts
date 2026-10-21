@@ -63,6 +63,7 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "deep-research", name: "Deep Research", intentKey: "deep_multi_source_research", tier: "T1", description: "Synthesizes multi-source academic/web research" },
     { id: "deep-research-team", name: "Deep Research Team", intentKey: "collaborative_research_team", tier: "T1", description: "Team-based deep investigation" },
     { id: "hackathon-winner-thinking", name: "Hackathon Winner Thinking", intentKey: "hackathon_ideation_differentiation", tier: "T1", description: "High-impact ideation, prize criteria alignment, and rapid pitch structuring" },
+    { id: "nia-oracle", name: "Nia Oracle", intentKey: "nia_oracle_paired_research", tier: "T1", description: "Pointer to the nia research pair. Pin and license are unresolved; do not vendor." },
   ],
   "writing": [
     { id: "humanizer", name: "Humanizer", intentKey: "natural_human_writing", tier: "T1", description: "Polishes text to remove AI voice slop" },
@@ -117,10 +118,9 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
     return { skillId: "deep-research", status: "tie_break" };
   }
 
-  // 3. Deterministic fallback to manual
-  const firstSkill = skills[0];
+  // 3. No exact key and no sector tie-break: do not guess the first skill.
   return {
-    skillId: firstSkill ? firstSkill.id : "manual",
+    skillId: "manual",
     status: "manual_fallback",
   };
 }

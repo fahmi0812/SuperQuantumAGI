@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.coding.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Coding & Engineering Sector Subagent** (Sector 2).

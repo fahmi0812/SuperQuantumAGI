@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.devops-infra-finance.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **DevOps, Infra, & Finance Sector Subagent** (Sector 11).

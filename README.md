@@ -92,7 +92,7 @@ LiteLLM and jev-model-router have been completely removed and archived (Tier 3).
 - **Core-Active (Enabled by default):**
   - `codebase-memory-mcp` (Local graph code intelligence)
   - `context7` (Live documentation endpoint)
-  - `shadcn` (Component generation & design system)
+  - `shadcn@4.22.1` (Component generation & design system). Pinned in `.opencode/opencode.jsonc`. Historical notes that mention v4.21.1 are not the runtime pin.
 - **`re-analysis` (Safe RE profile, lazy on-demand, disabled by default):**
   - `ghidra`, `jshook`, `idapro`
 - **`offensive-c2` (Offensive profile, disabled by default):**
@@ -107,7 +107,7 @@ LiteLLM and jev-model-router have been completely removed and archived (Tier 3).
 
 - **Linux** (Ubuntu, Debian, Fedora, Arch, etc.)
 - **OpenCode V2**: `opencode --version`
-- **Node.js**: >= 22.x (with native TypeScript strip-types support)
+- **Node.js**: >= 22.x (with native TypeScript strip-types support). `node ci/run-gates.mjs` hard-fails below 22. There is no Node 20 transpile fallback.
 - **Bubblewrap**: for local sandboxing (`sudo apt install bubblewrap` or `sudo pacman -S bubblewrap`)
 - **9router**: Connected natively in `~/.config/opencode/opencode.json` (OpenCode handles inference directly)
 
@@ -167,4 +167,6 @@ node ci/run-gates.mjs
 - **License Hygiene**: Never vendor copyleft (GPL/AGPL) code directly into the repository. Keep external tools as external pointers or detached network endpoints.
 - **Single-Writer Law**: Subagents write exclusively to `runtime/progress.{agent_id}.md`. Only the `synthesizer` subagent writes to `task_plan.md` and `findings.md`.
 - **NFR11 Authorization**: Offensive pentest operations require `--pentest` authorization and a non-example consent file (`consent/pentest-scope.json`). Do not commit live consent tokens or sensitive target scopes.
+- **Published docs**: `README.md`, `NOTICE`, `THIRD_PARTY_LICENSES`, and `docs/archive-alternatives.md` are the docs that belong in git. Local PRD/catalog dumps stay on disk and are gitignored.
+- **P2 catalog skills** (`diagram-design`, `deck-design`, `json-render`, ECC subset, `unslop`, `pptx-official`, `pageindex`) are not installed. Their source URLs were incomplete or truncated, so no pin or URL was invented.
 

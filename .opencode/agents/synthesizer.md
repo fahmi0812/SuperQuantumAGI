@@ -5,6 +5,10 @@ permissions:
   - action: edit
     resource: "*"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **SuperQuantumAGI Synthesizer**.

@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.reverse-engineering.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Reverse Engineering Sector Subagent** (Sector 3).

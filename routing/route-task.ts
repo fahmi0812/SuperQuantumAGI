@@ -1,13 +1,18 @@
 import type { Layer1TriageOutput } from "../harness/io-schema/types.ts";
-import { classifyDeterministic, type ClassifyResult } from "./classify.ts";
+import { buildTriagePrompt, parseTriageOutput } from "./layer1-triage.ts";
 import { routeLayer0 } from "./layer0-zero-llm.ts";
 
 export interface RouteTaskResult extends Layer1TriageOutput {
   layer: "layer0" | "layer1";
-  status: ClassifyResult["status"];
+  status: "matched" | "manual_fallback";
 }
 
-export function routeTask(prompt: string): RouteTaskResult {
+export interface RouteTaskOptions {
+  /** Exactly one active-model completion. Not called on Layer-0 early-exit. */
+  complete?: (triagePrompt: string) => Promise<string> | string;
+}
+
+export async function routeTask(prompt: string, options: RouteTaskOptions = {}): Promise<RouteTaskResult> {
   const early = routeLayer0(prompt);
   if (early.matched && early.sector && early.complexity && early.profile) {
     const profile = early.sector === "reverse-engineering" ? "ReAnalysis" : early.profile;
@@ -26,6 +31,16 @@ export function routeTask(prompt: string): RouteTaskResult {
     };
   }
 
-  const classified = classifyDeterministic(prompt);
-  return { ...classified, layer: "layer1" };
+  if (!options.complete) {
+    throw new Error("Layer-1 triage requires exactly one active-model completer. Refusing a silent local router.");
+  }
+
+  const raw = await options.complete(buildTriagePrompt(prompt));
+  const parsed = parseTriageOutput(raw);
+  const unparseable = parsed.reasoning.startsWith("Fallback triggered");
+  return {
+    ...parsed,
+    layer: "layer1",
+    status: unparseable ? "manual_fallback" : "matched",
+  };
 }

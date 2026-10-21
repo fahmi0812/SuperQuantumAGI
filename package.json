@@ -3,8 +3,14 @@
   "private": true,
   "type": "module",
   "description": "Non-invasive OpenCode harness. Tests import the implementation, not copied logic.",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --experimental-strip-types tests/suite.mjs",
     "ci": "node ci/run-gates.mjs"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.1.2"
   }
 }

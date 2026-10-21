@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.research.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Research & Ideation Sector Subagent** (Sector 8).

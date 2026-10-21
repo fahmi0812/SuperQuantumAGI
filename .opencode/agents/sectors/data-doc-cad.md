@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.data-doc-cad.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Data, Document, & CAD Sector Subagent** (Sector 7).

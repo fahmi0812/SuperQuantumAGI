@@ -29,6 +29,10 @@ permissions:
   - action: edit
     resource: "*/progress.writing.md"
     effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+
 ---
 
 You are the **Writing & Productivity Sector Subagent** (Sector 9).
