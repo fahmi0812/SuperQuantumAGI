@@ -43,7 +43,7 @@ You are the **Motion & Media Sector Subagent** (Sector 6).
   2. `claude-remotion-skill` (Permissive MIT React video generator; replaces unlicensed remotion-dev/skills)
   3. `gsap-skills` (Web GSAP vector animations)
   4. `manim` (Programmatic mathematical visualization)
-- Supporting: `hyperframes`, `diagram-design`, `deck-design`.
+- Supporting: `hyperframes`, `diagram-design`, `deck-design`, `json-render`.
 
 ## Single-Writer Law
 - Write all render specifications, frame pipelines, and asset paths strictly to `runtime/progress.motion-media.md`.

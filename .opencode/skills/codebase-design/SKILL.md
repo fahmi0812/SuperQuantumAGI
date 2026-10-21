@@ -7,12 +7,29 @@ description: Designs modular boundaries before editing, using existing project s
 
 Source: https://github.com/mattpocock/skills
 Pin: d81f3a183412e71a5b1e84ca21bc1a35eea03a60
+Commit-Date: 2026-09-29
 License: MIT (mattpocock/skills). Local summary, not a vendored copy.
 
-## Method
+## Tujuan
 
-1. Read the existing module boundaries before proposing new ones.
-2. Prefer a small interface over a new framework.
-3. Name the owner of each new file and what it must not import.
-4. Keep the change inside one blast radius unless the operator consents to widen it.
-5. Record the design decision in the sector progress file, not in task_plan.md.
+Menetapkan batas modul sebelum kode ditulis, memakai struktur yang sudah ada sebagai kendala.
+
+## Kapan dipakai
+
+Pakai sebelum menambah paket, lapisan, atau folder baru. Jangan pakai untuk typo satu baris.
+
+## Langkah
+
+1. Baca batas modul yang sudah ada sebelum mengusulkan yang baru.
+2. Pilih antarmuka kecil, bukan framework baru.
+3. Sebut pemilik tiap file baru dan apa yang tidak boleh diimpornya.
+4. Jaga perubahan di satu blast radius kecuali operator menyetujui pelebaran.
+5. Catat keputusan di progress file sektor, bukan di task_plan.md.
+
+## Input / output
+
+Input: struktur repo dan perubahan yang diinginkan. Output: batas modul, pemilik file, dan impor yang ditolak.
+
+## Batasan
+
+Jangan merombak arsitektur yang sudah lolos hanya karena gaya.

@@ -6,15 +6,30 @@ description: Coordinates domain specialists in parallel when a task crosses more
 # Parallel Agents
 
 Source: https://github.com/davila7/claude-code-templates
-Pin: # TODO: resolve pin
-License: MIT (davila7/claude-code-templates). Local summary, not a vendored copy.
+Pin: e7d17f93bb90d4f351733f06716fe92fdb25de28
+Commit-Date: 2026-10-21
+License: MIT. Local summary. Not a vendored copy.
 
-## Method
+## Tujuan
 
-Use this for domain fan-out, not for unrelated chores.
+Mengumpulkan jawaban dari sektor yang benar-benar relevan, tanpa mengundang semua sektor.
 
-1. Name the sectors that must speak. Do not invite every sector.
-2. Write a shared question and the evidence each sector must return.
-3. Keep writes isolated to runtime/progress.{agent_id}.md.
-4. The synthesizer is the only writer of task_plan.md and findings.md.
-5. If two sectors disagree, record both claims and the evidence. Do not average them.
+## Kapan dipakai
+
+Pakai saat satu pertanyaan butuh bukti dari lebih dari satu domain. Jangan pakai untuk tugas satu file.
+
+## Langkah
+
+1. Sebut sektor yang harus bicara dan bukti yang wajib kembali.
+2. Tiap sektor menulis hanya ke progress file-nya.
+3. Pertanyaan bersama tetap sama; jangan mengubah scope di tengah jalan.
+4. Jika dua sektor bertentangan, simpan kedua klaim beserta buktinya.
+5. Synthesizer menggabungkan. Jangan merata-ratakan klaim yang bertentangan.
+
+## Input / output
+
+Input: pertanyaan bersama dan daftar sektor. Output: progress file dan catatan kontradiksi.
+
+## Batasan
+
+Bukan fan-out untuk chore yang tidak terkait. Kedalaman subagent tetap satu.

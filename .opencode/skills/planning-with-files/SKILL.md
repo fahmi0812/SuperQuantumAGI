@@ -25,7 +25,8 @@ description: Maintain single-writer anti-race file-based coordination with task_
 Under no circumstances should any sector subagent attempt to write to `task_plan.md` or `findings.md`. Doing so violates the anti-race constraint and risks overwriting concurrent progress.
 
 Source: https://github.com/davila7/claude-code-templates
-Pin: # TODO: resolve pin
+Pin: e7d17f93bb90d4f351733f06716fe92fdb25de28
+Commit-Date: 2026-10-21
 License: MIT. This file is a local protocol summary, not a vendored copy.
 
 ## Working sequence

@@ -1,0 +1,176 @@
+# Offline routing eval. Not the default CI gate.
+# The exec provider uses the deterministic Layer-1 stand-in so the golden set
+# can be checked without a live model. A pass here is not a 9router pass.
+# Live grading is not configured. Do not point this file at a guessed model.
+# Run: promptfoo eval -c ci/promptfoo-config.yaml
+# Requires promptfoo installed by the operator (npx promptfoo or a local venv).
+# Default `node ci/run-gates.mjs` does not invoke this file.
+description: SuperQuantumAGI offline routing eval. Target accuracy is at least 90 percent. Not a default CI gate.
+prompts:
+  - "{{prompt}}"
+providers:
+  - exec:bash ci/eval/routing-provider.sh
+tests:
+  - description: eval-sec-01
+    vars:
+      prompt: "Orchestrate a parallel code audit across 3 subagents and gather results into a markdown report"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "orchestration-quality"
+            && out.complexity === "High"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-02
+    vars:
+      prompt: "Fix this null pointer exception in user auth service and run Jest tests"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "coding"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-03
+    vars:
+      prompt: "Decompile this Android APK and inspect the native lib frida hooks"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "reverse-engineering"
+            && out.complexity === "High"
+            && out.profile === "ReAnalysis"
+            && out.liveModel === false;
+
+  - description: eval-sec-04
+    vars:
+      prompt: "Perform an authorized white-box security audit against SQL injection vulnerabilities in the payment gateway"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "security-pentest"
+            && out.complexity === "High"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-05
+    vars:
+      prompt: "Geolocate these coordinates and overlay recent Sentinel-2 satellite imagery using Leafmap"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "osint"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-06
+    vars:
+      prompt: "Render an explanatory 60fps kinetic typography video using HTML, Playwright, and FFmpeg"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "motion-media"
+            && out.complexity === "High"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-07
+    vars:
+      prompt: "Extract tables from quarterly earnings report PDF and convert to structured Markdown and Excel"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "data-doc-cad"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-08
+    vars:
+      prompt: "Conduct deep academic literature synthesis on speculative decoding algorithms from ArXiv"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "research"
+            && out.complexity === "High"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-09
+    vars:
+      prompt: "Rewrite this documentation page to eliminate corporate buzzwords and robotic AI cadence"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "writing"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-10
+    vars:
+      prompt: "Tailor this software engineer resume for a Staff Distributed Systems role and generate interview questions"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "career"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-11
+    vars:
+      prompt: "Analyze cluster node utilization in Kubernetes and generate Terraform cost optimizations"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "devops-infra-finance"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-12
+    vars:
+      prompt: "unslop this release note and remove the robotic cadence"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "writing"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+
+  - description: eval-sec-13
+    vars:
+      prompt: "Generate a pptx briefing from these product bullets"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.sector === "data-doc-cad"
+            && out.complexity === "Low"
+            && out.profile === "Default"
+            && out.liveModel === false;
+  - description: intent-registry-unique
+    vars:
+      prompt: "__intent_registry__"
+    assert:
+      - type: javascript
+        value: |
+          const out = JSON.parse(output);
+          return out.registryUnique === true && out.sectors === 11;

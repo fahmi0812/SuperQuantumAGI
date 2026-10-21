@@ -6,8 +6,9 @@ description: Guides native binary inspection: format, symbols, and control-flow 
 # REA
 
 Source: https://github.com/morluto/rea
-Pin: # TODO: resolve pin
-License: Upstream pin unresolved. Local summary only. Do not vendor until the pin and license are confirmed.
+Pin: 6d356b84344659085f2b912857b5e27fe0160c9b
+Commit-Date: 2026-10-21
+License: MIT, confirmed via GitHub API on 2026-10-21. Local summary only. Do not vendor.
 
 ## Method
 

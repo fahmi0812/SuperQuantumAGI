@@ -75,5 +75,19 @@
     "expectedSector": "devops-infra-finance",
     "expectedComplexity": "Low",
     "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-12",
+    "prompt": "unslop this release note and remove the robotic cadence",
+    "expectedSector": "writing",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-13",
+    "prompt": "Generate a pptx briefing from these product bullets",
+    "expectedSector": "data-doc-cad",
+    "expectedComplexity": "Low",
+    "expectedProfile": "Default"
   }
 ]
