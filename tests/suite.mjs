@@ -712,7 +712,8 @@ test("install script creates symlinks, merges opencode config non-destructively,
   assert.equal(fs.existsSync(path.join(targetDir, "skills/smartdoc")), true);
   assert.equal(fs.existsSync(path.join(targetDir, "commands/blast-radius.md")), true);
   assert.equal(fs.existsSync(path.join(targetDir, "rules/01-verification.md")), true);
-  assert.equal(fs.existsSync(path.join(targetDir, "plugins/superquantumagi")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "plugins/superquantumagi-global")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, "plugins/superquantumagi")), false);
   assert.equal(fs.existsSync(path.join(binDir, "superq")), true);
 
   const merged = JSON.parse(fs.readFileSync(path.join(targetDir, "opencode.json"), "utf8"));
@@ -738,6 +739,20 @@ test("install script creates symlinks, merges opencode config non-destructively,
   assert.equal(restored.mcp, undefined);
 
   fs.rmSync(tmpBase, { recursive: true, force: true });
+});
+
+test("project plugin discovery skips the global duplicate inside this checkout", async () => {
+  const { projectPluginDiscovered } = await import(
+    "../.opencode/plugins/superquantumagi/discover.ts"
+  );
+  assert.equal(projectPluginDiscovered(root), true);
+  assert.equal(projectPluginDiscovered(path.join(root, "scripts")), true);
+  assert.equal(projectPluginDiscovered("/tmp"), false);
+  assert.equal(projectPluginDiscovered(undefined), false);
+  const globalSrc = fs.readFileSync(path.join(root, "harness/plugin-global/index.ts"), "utf8");
+  assert.match(globalSrc, /id: "superquantumagi\.global"/);
+  assert.match(globalSrc, /realpathSync/);
+  assert.equal(/from ["']\.\.\/\.\.\/\.opencode/.test(globalSrc), false);
 });
 
 test("parseJsonc keeps commas and comment markers inside strings", async () => {
