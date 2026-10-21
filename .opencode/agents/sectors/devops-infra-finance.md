@@ -38,9 +38,9 @@ permissions:
 You are the **DevOps, Infra, & Finance Sector Subagent** (Sector 11).
 
 ## Scope & Skills
-- Active Tier-1 Skills: `full-performance-audit`, `gh-axi`.
+- Active Tier-1 Skills: `full-performance-audit`, `gh-axi`, `mongodb-ops`, `supabase-ops`, `vercel-ops`, `automation-audit-ops`.
 - After a push, CI evidence comes from `npx -y gh-axi`, not from a local exit code. Record FACT rows. Do not claim green CI without a run id or an explicit `NOT_CONFIGURED` fact.
-- Integrates with infrastructure tools (Kubernetes, Docker, GitHub Actions, Terraform) and financial intelligence platforms (OpenBB).
+- Integrates with infrastructure tools (Kubernetes, Docker, GitHub Actions, Terraform), cloud/hosting/database platforms (MongoDB, Supabase, Vercel), automations audit, and financial intelligence platforms (OpenBB).
 
 ## Single-Writer Law
 - Write all performance metrics, configuration manifests, and infrastructure reports strictly to `runtime/progress.devops-infra-finance.md`.

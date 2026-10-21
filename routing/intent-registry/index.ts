@@ -39,6 +39,9 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "to-tickets", name: "To Tickets", intentKey: "tickets_from_spec", tier: "T1", description: "Break a spec into tracer-bullet tickets" },
     { id: "domain-modeling", name: "Domain Modeling", intentKey: "domain_model_seams", tier: "T1", description: "Sharpen domain terms, glossary, and ADRs" },
     { id: "click-path-audit", name: "Click Path Audit", intentKey: "click_path_handler_audit", tier: "T1", description: "Trace controls through handlers and shared-store writes" },
+    { id: "mongodb-ops", name: "MongoDB Ops", intentKey: "mongodb_schema_ops", tier: "T1", description: "MongoDB data modeling, schemas, and queries in application code" },
+    { id: "supabase-ops", name: "Supabase Ops", intentKey: "supabase_backend_ops", tier: "T1", description: "Supabase client integration, RLS, and backend routes in application code" },
+    { id: "vercel-ops", name: "Vercel Ops", intentKey: "vercel_deploy_ops", tier: "T1", description: "Next.js routing, edge runtime, and Vercel configuration in application code" },
   ],
   "reverse-engineering": [
     { id: "reverse-skill", name: "Reverse Skill", intentKey: "re_router_primary", tier: "T1", description: "Primary router for binary and app decompilation" },
@@ -74,6 +77,8 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "text-to-cad", name: "Text-to-CAD", intentKey: "parametric_3d_cad", tier: "T1", description: "Generates 3D CAD models from text" },
     { id: "pptx-official", name: "Pptx Official", intentKey: "generate_pptx_decks", tier: "T1", description: "Builds a pptx from an outline. Upstream Anthropic text is not vendored." },
     { id: "pageindex", name: "PageIndex", intentKey: "index_long_documents", tier: "T1", description: "Builds a page tree for a long document before answering from it" },
+    { id: "smartdoc", name: "SmartDoc", intentKey: "smartdoc_job", tier: "T1", description: "Per-job document intelligence, OCR, extraction, and verification" },
+    { id: "smartbook-ingest", name: "SmartBook Ingest", intentKey: "smartbook_ingest", tier: "T1", description: "Compile and manage reusable knowledge SmartBooks" },
   ],
   "research": [
     { id: "deep-research", name: "Deep Research", intentKey: "deep_multi_source_research", tier: "T1", description: "Synthesizes multi-source academic/web research" },
@@ -94,6 +99,10 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
   "devops-infra-finance": [
     { id: "full-performance-audit", name: "Full Performance Audit", intentKey: "infrastructure_performance_audit", tier: "T1", description: "Audits cloud, container, and database performance" },
     { id: "gh-axi", name: "gh-axi", intentKey: "github_actions_ci", tier: "T1", description: "Inspect GitHub Actions after a push" },
+    { id: "mongodb-ops", name: "MongoDB Ops", intentKey: "mongodb_ops", tier: "T1", description: "MongoDB and Mongoose schemas, indexes, and aggregation" },
+    { id: "supabase-ops", name: "Supabase Ops", intentKey: "supabase_ops", tier: "T1", description: "Supabase Postgres, migrations, RLS, and Auth contracts" },
+    { id: "vercel-ops", name: "Vercel Ops", intentKey: "vercel_ops", tier: "T1", description: "Vercel hosting, vercel.json, edge routing, and preview URLs" },
+    { id: "automation-audit-ops", name: "Automation Audit Ops", intentKey: "automation_audit_ops", tier: "T1", description: "Evidence-first inventory of live automations, cron, and CI" },
   ],
 };
 
@@ -132,6 +141,12 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
   }
 
   if (sector === "data-doc-cad") {
+    if (normalized.includes("smartbook") || normalized.includes("jadikan buku") || normalized.includes("pelajari modul")) {
+      return { skillId: "smartbook-ingest", status: "tie_break" };
+    }
+    if (normalized.includes("smartdoc") || normalized.includes("document contract") || normalized.includes("kerjakan soal")) {
+      return { skillId: "smartdoc", status: "tie_break" };
+    }
     if (normalized.includes("pptx") || normalized.includes("slide deck")) {
       return { skillId: "pptx-official", status: "tie_break" };
     }
@@ -155,6 +170,36 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
       return { skillId: "eval-harness", status: "tie_break" };
     }
     if (normalized.includes("gh-axi") || normalized.includes("github ci") || normalized.includes("github_ci_ops")) {
+      return { skillId: "gh-axi", status: "tie_break" };
+    }
+    if (normalized.includes("mongodb") || normalized.includes("mongoose") || normalized.includes("mongo")) {
+      return { skillId: "mongodb-ops", status: "tie_break" };
+    }
+    if (normalized.includes("supabase") || normalized.includes("rls")) {
+      return { skillId: "supabase-ops", status: "tie_break" };
+    }
+    if (normalized.includes("vercel")) {
+      return { skillId: "vercel-ops", status: "tie_break" };
+    }
+  }
+
+  if (sector === "devops-infra-finance") {
+    if (normalized.includes("mongodb") || normalized.includes("mongoose") || normalized.includes("mongo")) {
+      return { skillId: "mongodb-ops", status: "tie_break" };
+    }
+    if (normalized.includes("supabase") || normalized.includes("postgrest") || normalized.includes("rls")) {
+      return { skillId: "supabase-ops", status: "tie_break" };
+    }
+    if (normalized.includes("vercel") || normalized.includes("edge routing") || normalized.includes("preview url")) {
+      return { skillId: "vercel-ops", status: "tie_break" };
+    }
+    if (normalized.includes("automation") || normalized.includes("cron") || normalized.includes("inventory")) {
+      return { skillId: "automation-audit-ops", status: "tie_break" };
+    }
+    if (normalized.includes("performance") || normalized.includes("audit") || normalized.includes("bottleneck")) {
+      return { skillId: "full-performance-audit", status: "tie_break" };
+    }
+    if (normalized.includes("gh-axi") || normalized.includes("github") || normalized.includes("actions")) {
       return { skillId: "gh-axi", status: "tie_break" };
     }
   }
