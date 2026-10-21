@@ -22,10 +22,11 @@ jobs:
           if [ -e /proc/sys/kernel/unprivileged_userns_clone ]; then
             sudo sysctl -w kernel.unprivileged_userns_clone=1
           fi
-          bwrap --ro-bind /usr /usr --proc /proc --dev /dev --unshare-net --die-with-parent /usr/bin/bash -c 'echo SANDBOX_CI_OK'
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Smoke bwrap through the harness builder
+        run: node ci/bwrap-smoke.mjs
       - run: npm ci
       - run: node ci/run-gates.mjs
       - name: Harness hash is reproducible

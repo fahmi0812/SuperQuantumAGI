@@ -343,6 +343,21 @@ test("bwrap runner executes inside the sandbox", () => {
   assert.match(result.stdout, /SANDBOX_FN_OK/);
 });
 
+test("CI bwrap smoke uses the harness builder, not a partial bind", () => {
+  const smoke = fs.readFileSync(path.join(root, "ci/bwrap-smoke.mjs"), "utf8");
+  const workflow = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
+  assert.match(smoke, /buildBwrapCommand/);
+  assert.equal(smoke.includes("--ro-bind /usr /usr"), false);
+  assert.match(workflow, /node ci\/bwrap-smoke\.mjs/);
+  assert.equal(workflow.includes("bwrap --ro-bind /usr /usr --proc /proc"), false);
+  const ran = spawnSync(process.execPath, [path.join(root, "ci/bwrap-smoke.mjs")], {
+    cwd: root,
+    encoding: "utf8",
+    timeout: 20000,
+  });
+  assert.equal(ran.status, 0, ran.stderr);
+});
+
 test("layer-1 calls the injected completer once and does not embed a second router", async () => {
   const src = fs.readFileSync(path.join(root, "routing/route-task.ts"), "utf8");
   assert.equal(src.includes("classifyDeterministic"), false);
