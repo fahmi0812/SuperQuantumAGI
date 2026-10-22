@@ -20,7 +20,15 @@ import { runInSandbox } from "../harness/sandbox/bwrap-runner.ts";
 import { applyShellCreateBefore, decideSectorShell } from "../harness/sandbox/sector-shell.cjs";
 import { createActiveModelCompleter, normalizeModelRef, resolveActiveModel } from "../routing/active-model.ts";
 import { classifyDeterministic } from "../routing/classify.ts";
-import { planDispatch } from "../routing/dispatch.ts";
+import { planDispatch, triagePayload } from "../routing/dispatch.ts";
+import {
+  DISPATCH_LEDGER_RELATIVE,
+  compareDispatch,
+  emptyLedger,
+  noteInvoked,
+  notePlanned,
+  writeLedger,
+} from "../routing/dispatch-ledger.ts";
 import { SECTOR_SKILL_REGISTRY, resolveSkillInSector } from "../routing/intent-registry/index.ts";
 import { buildTriagePrompt, parseTriageOutput } from "../routing/layer1-triage.ts";
 import { routeLayer0 } from "../routing/layer0-zero-llm.ts";
@@ -229,12 +237,95 @@ test("routeTask hits the golden set at or above 90 percent", async () => {
     const profileOk = routed.profile === item.expectedProfile;
     if (sectorOk && complexityOk && profileOk) correct += 1;
     else console.error("mismatch", item.id, routed);
-    const plan = planDispatch({ complexity: routed.complexity, sector: routed.sector });
-    if (item.expectedComplexity === "Low") assert.equal(plan.subagents.length, 1);
-    if (item.expectedComplexity === "High") assert.ok(plan.subagents.length > 1);
+    const plan = planDispatch({
+      complexity: routed.complexity,
+      sector: routed.sector,
+      sectors: routed.sectors,
+    });
+    if (item.expectedComplexity === "Low") {
+      assert.equal(plan.mode, "fast-path");
+      assert.equal(plan.subagents.length, 1);
+    }
+    if (item.expectedComplexity === "High") {
+      assert.equal(plan.mode, "serial");
+      assert.deepEqual(plan.subagents, [`sectors/${routed.sector}`]);
+    }
   }
   const accuracy = correct / cases.length;
   assert.ok(accuracy >= 0.9, `routing accuracy ${accuracy} < 0.9`);
+});
+
+test("high single-sector dispatch stays serial and does not add a companion", () => {
+  const plan = planDispatch({ complexity: "High", sector: "coding" });
+  assert.equal(plan.mode, "serial");
+  assert.deepEqual(plan.subagents, ["sectors/coding"]);
+  const payload = triagePayload({ sector: "coding", complexity: "High", profile: "Default" });
+  assert.equal(payload.dispatch, "serial");
+  assert.equal(payload.subagents.includes("sectors/orchestration-quality"), false);
+});
+
+test("parallel dispatch uses only named sectors and caps at 3", () => {
+  const plan = planDispatch({
+    complexity: "High",
+    sector: "coding",
+    sectors: ["security-pentest", "not-a-sector", "writing", "research", "osint"],
+  });
+  assert.equal(plan.mode, "parallel");
+  assert.deepEqual(plan.subagents, ["sectors/coding", "sectors/security-pentest", "sectors/writing"]);
+});
+
+test("low dispatch ignores extra named sectors", () => {
+  const plan = planDispatch({
+    complexity: "Low",
+    sector: "writing",
+    sectors: ["coding", "research"],
+  });
+  assert.equal(plan.mode, "fast-path");
+  assert.deepEqual(plan.subagents, ["sectors/writing"]);
+});
+
+test("triage parser keeps the primary sector first and at most three names", () => {
+  const parsed = parseTriageOutput(
+    JSON.stringify({
+      sector: "coding",
+      complexity: "High",
+      profile: "Default",
+      sectors: ["security-pentest", "nope", "coding", "research", "osint"],
+    }),
+  );
+  assert.deepEqual(parsed.sectors, ["coding", "security-pentest", "research"]);
+  const plan = planDispatch({ complexity: parsed.complexity, sector: parsed.sector, sectors: parsed.sectors });
+  assert.equal(plan.mode, "parallel");
+  assert.equal(plan.subagents.length, 3);
+});
+
+test("dispatch ledger records planned sector against the sector actually invoked", () => {
+  const ledger = emptyLedger();
+  notePlanned(
+    ledger,
+    "ses_1",
+    {
+      plannedSector: "coding",
+      dispatch: "serial",
+      planned: ["sectors/coding"],
+      surface: "fix the pool",
+    },
+    "2026-10-22T00:00:00.000Z",
+  );
+  noteInvoked(ledger, "ses_1", "sectors/security-pentest", "2026-10-22T00:00:01.000Z");
+  noteInvoked(ledger, "ses_1", "synthesizer", "2026-10-22T00:00:02.000Z");
+  const row = ledger.sessions.ses_1;
+  assert.match(row.fact, /^FACT: dispatch drift /);
+  assert.match(row.fact, /extra=sectors\/security-pentest/);
+  assert.equal(row.invoked.includes("synthesizer"), true);
+  const compared = compareDispatch({ planned: ["coding"], invoked: ["coding"] });
+  assert.match(compared.fact, /^FACT: dispatch planned=sectors\/coding invoked=sectors\/coding$/);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-dispatch-"));
+  const file = path.join(dir, DISPATCH_LEDGER_RELATIVE);
+  writeLedger(file, ledger);
+  const read = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(read.sessions.ses_1.plannedSector, "coding");
+  fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test("reverse-engineering route never selects the offensive profile", async () => {
@@ -468,6 +559,10 @@ test("plugin wraps sector shells and triages with the active model", () => {
   const src = fs.readFileSync(path.join(root, ".opencode/plugins/superquantumagi/index.ts"), "utf8");
   assert.equal(src.includes("applyShellCreateBefore"), true);
   assert.equal(src.includes("createActiveModelCompleter"), true);
+  assert.equal(src.includes("triagePayload"), true);
+  assert.equal(src.includes("noteInvoked"), true);
+  assert.equal(src.includes("DISPATCH_LEDGER_RELATIVE"), true);
+  assert.equal(fs.readFileSync(path.join(root, "routing/dispatch.ts"), "utf8").includes('"fan-out"'), false);
   assert.equal(src.includes("session.hook(\"context\""), true);
   assert.equal(src.includes("session.generate"), false);
   assert.equal(src.includes("event.prompt.text ="), false);

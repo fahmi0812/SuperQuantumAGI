@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- High dispatch is serial for one sector. Parallel runs only the named sectors, at most 3, and no longer adds `orchestration-quality` automatically.
+- The `[superq-triage]` line carries `dispatch` and `subagents` from `planDispatch`.
+- The plugin records the planned sector against the subagent that actually ran in `runtime/triage-dispatch.json`.
+
 ## 0.2.0
 
 Quality parity with OpenCodeHighEnd `30d394fb37bbe1ca64abe1a660aefd91ac7d99fc`. No OpenCode core changes.

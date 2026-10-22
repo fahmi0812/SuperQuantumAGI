@@ -25,8 +25,9 @@ Instruksi Pengguna
     ▼
 [Layer-1: Triage Sektor]         ── (Klasifikasi ke 1 dari 11 sektor + kompleksitas)
     │
-    ├─ Rendah ──► Jalur Cepat (1 sub-agen)
-    └─ Tinggi ──► Pembagian Tugas Antar Sektor
+    ├─ Rendah ──► fast-path (1 sub-agen)
+    └─ Tinggi ──► serial (1 sektor, berantai)
+          │       atau parallel (hanya sektor yang disebut, maks 3)
           │
           ▼
    [Layer-2: Sub-agen Sektor]    ── (Memilih skill Tier-1 sesuai kebutuhan)

@@ -17,6 +17,7 @@ export type SectorID =
   | "devops-infra-finance";
 
 export type ComplexityTier = "Low" | "High";
+export type DispatchMode = "fast-path" | "serial" | "parallel";
 export type ProfileTier = "Default" | "Pentest" | "ReAnalysis";
 export type QualityObligation = "none" | "post-push";
 export type VerificationProfile = "FAST" | "STANDARD" | "UI" | "SECURITY" | "PERFORMANCE" | "RELEASE";
@@ -41,6 +42,8 @@ export interface Layer1TriageOutput {
   sector: SectorID;
   complexity: ComplexityTier;
   profile: ProfileTier;
+  /** Named sectors for a parallel plan. Absent means the primary sector only. */
+  sectors?: SectorID[];
   intentVsTask: {
     surfaceRequest: string;
     underlyingIntent: string;
