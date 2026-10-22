@@ -5,6 +5,7 @@
  * be treated as an offensive launch. Does not add a model router.
  */
 
+import path from "node:path";
 import { Plugin } from "@opencode/plugin";
 import { isBwrapAvailable } from "../../../harness/sandbox/bwrap-command.cjs";
 import {
@@ -21,6 +22,14 @@ import {
   readPostPushFact,
 } from "../../../harness/post-push.ts";
 import { createActiveModelCompleter } from "../../../routing/active-model.ts";
+import { triagePayload } from "../../../routing/dispatch.ts";
+import {
+  DISPATCH_LEDGER_RELATIVE,
+  emptyLedger,
+  noteInvoked,
+  notePlanned,
+  writeLedger,
+} from "../../../routing/dispatch-ledger.ts";
 import { routeLayer0 } from "../../../routing/layer0-zero-llm.ts";
 import { routeTask } from "../../../routing/route-task.ts";
 import {
@@ -38,24 +47,53 @@ interface TriageState {
 }
 
 const triageBySession = new Map<string, TriageState>();
+const dispatchLedger = emptyLedger();
+let ledgerDirectory: string | undefined;
 let postPushPending = false;
 
-function triageLine(routed: {
-  sector: string;
-  complexity: string;
-  profile: string;
-  qualityObligation?: string;
-}): string {
-  const payload: Record<string, string> = {
-    sector: routed.sector,
-    complexity: routed.complexity,
-    profile: routed.profile,
-  };
-  if (routed.qualityObligation && routed.qualityObligation !== "none") {
-    payload.qualityObligation = routed.qualityObligation;
+function sessionIDFrom(event: { sessionID?: unknown; sessionId?: unknown }): string {
+  const direct = event.sessionID ?? event.sessionId;
+  if (typeof direct === "string" && direct.trim()) return direct.trim();
+  const ids = [...triageBySession.keys()];
+  return ids.length === 1 ? ids[0] : "unscoped";
+}
+
+function agentFromInput(input: unknown): string | null {
+  if (!input || typeof input !== "object") return null;
+  const raw = (input as { agent?: unknown; name?: unknown }).agent ?? (input as { name?: unknown }).name;
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
+}
+
+function persistDispatchLedger(directory: string | undefined): void {
+  if (!directory) return;
+  try {
+    writeLedger(path.join(directory, DISPATCH_LEDGER_RELATIVE), dispatchLedger);
+  } catch {
+    // A ledger write must not fail the turn.
   }
+}
+
+function triageLine(
+  sessionID: string,
+  text: string,
+  routed: {
+    sector: string;
+    complexity: string;
+    profile: string;
+    sectors?: readonly string[];
+    qualityObligation?: string;
+  },
+): string {
+  const payload = triagePayload(routed);
+  notePlanned(dispatchLedger, sessionID, {
+    plannedSector: payload.sector,
+    dispatch: payload.dispatch,
+    planned: payload.subagents,
+    surface: text,
+  });
+  persistDispatchLedger(ledgerDirectory);
   return [
-    "SuperQuantumAGI triage. Do not repeat this block to the user.",
+    "SuperQuantumAGI triage. Do not repeat this block to the user. Call only the listed subagents. serial is one sector in order. parallel is only the named sectors, max 3. Do not add a companion sector.",
     `${TRIAGE_MARK} ${JSON.stringify(payload)}`,
   ].join("\n");
 }
@@ -80,6 +118,7 @@ function postPushReminder(directory: string | undefined): string | null {
 
 export async function registerSuperquantum(ctx: any): Promise<void> {
     const directory = ctx.location?.directory;
+    ledgerDirectory = directory;
 
     await ctx.permission.hook("evaluate", async (event) => {
       const decision = evaluateRuntimePermission({
@@ -113,6 +152,14 @@ export async function registerSuperquantum(ctx: any): Promise<void> {
     });
 
     await ctx.tool.hook("execute.before", (event) => {
+      if (event.tool === "subagent") {
+        const agent = agentFromInput(event.input);
+        if (agent) {
+          noteInvoked(dispatchLedger, sessionIDFrom(event), agent);
+          persistDispatchLedger(directory);
+        }
+        return;
+      }
       if (event.tool !== "shell" && event.tool !== "bash") return;
       const command = shellCommandFromInput(event.input);
       if (command) notePendingShell(event.agent, command);
@@ -147,7 +194,7 @@ export async function registerSuperquantum(ctx: any): Promise<void> {
         const early = routeLayer0(state.text);
         if (early.matched && early.sector && early.complexity && early.profile) {
           const profile = early.sector === "reverse-engineering" ? "ReAnalysis" : early.profile;
-          state.line = triageLine({
+          state.line = triageLine(String(event.sessionID), state.text, {
             sector: early.sector,
             complexity: early.complexity,
             profile,
@@ -158,7 +205,7 @@ export async function registerSuperquantum(ctx: any): Promise<void> {
             complete: createActiveModelCompleter(ctx, event.model),
           })
             .then((routed) => {
-              state.line = triageLine(routed);
+              state.line = triageLine(String(event.sessionID), state.text, routed);
             })
             .catch(() => {
               state.line = "";

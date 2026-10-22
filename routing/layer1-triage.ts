@@ -36,14 +36,20 @@ Classify the following user task into:
    - devops-infra-finance (CI/CD, docker, k8s, financial analysis)
 
 2. COMPLEXITY:
-   - "Low": simple, single-step, fast-path (1 subagent)
-   - "High": multi-step, complex, requires fan-out / parallel coordination
+   - "Low": one step, one sector. Dispatch will be fast-path.
+   - "High": multi-step. This is serial unless SECTORS names 2 or 3 sectors that can work at the same time. High does not mean fan-out.
 
 3. PROFILE:
    - "Default": standard operations
    - "Pentest": offensive security/C2 simulation (requires explicit authorization)
 
-4. INTENT_VS_TASK:
+4. SECTORS:
+   - Omit when one sector is enough.
+   - Otherwise list 2 or 3 sector ids that must each produce evidence in parallel.
+   - Do not add orchestration-quality unless the task itself is orchestration.
+   - Sequential steps in one sector stay a single sector. Do not pad the list.
+
+5. INTENT_VS_TASK:
    - surfaceRequest: summary of explicit user prompt
    - underlyingIntent: root goal to achieve
    - isEmergencyPatch: true if production outage/quick hotfix requested
@@ -53,6 +59,7 @@ Output strictly valid JSON with this shape:
   "sector": "<one of the 11 sectors>",
   "complexity": "Low" | "High",
   "profile": "Default" | "Pentest",
+  "sectors": ["<sector>", "<sector>"],
   "intentVsTask": {
     "surfaceRequest": "...",
     "underlyingIntent": "...",
@@ -63,6 +70,17 @@ Output strictly valid JSON with this shape:
 
 Task:
 ${userPrompt}`;
+}
+
+function parseNamedSectors(raw: unknown, primary: SectorID): SectorID[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const named: SectorID[] = [];
+  for (const item of raw) {
+    if (typeof item !== "string" || !SECTORS_LIST.includes(item as SectorID) || item === primary) continue;
+    if (!named.includes(item as SectorID)) named.push(item as SectorID);
+  }
+  if (named.length === 0) return undefined;
+  return [primary, ...named].slice(0, 3);
 }
 
 export function parseTriageOutput(rawResponse: string): Layer1TriageOutput {
@@ -81,11 +99,13 @@ export function parseTriageOutput(rawResponse: string): Layer1TriageOutput {
     if (parsed.profile === "Pentest") profile = "Pentest";
     if (parsed.profile === "ReAnalysis") profile = "ReAnalysis";
     if (sector === "reverse-engineering") profile = "ReAnalysis";
+    const sectors = parseNamedSectors(parsed.sectors, sector);
 
     return {
       sector,
       complexity,
       profile,
+      ...(sectors ? { sectors } : {}),
       intentVsTask: {
         surfaceRequest: parsed.intentVsTask?.surfaceRequest || "",
         underlyingIntent: parsed.intentVsTask?.underlyingIntent || "",
