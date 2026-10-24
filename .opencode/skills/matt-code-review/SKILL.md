@@ -6,8 +6,8 @@ description: Reviews a diff for correctness, type safety, and regressions withou
 # Matt Code Review
 
 Source: https://github.com/mattpocock/skills
-Pin: d81f3a183412e71a5b1e84ca21bc1a35eea03a60
-Commit-Date: 2026-09-29
+Pin: 5beb35b040e3de97e54fa9e386d7e42d15c295c2
+Commit-Date: 2026-10-19
 License: MIT (mattpocock/skills). Local summary, not a vendored copy.
 
 ## Tujuan

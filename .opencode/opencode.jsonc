@@ -23,7 +23,7 @@
         "command": [
           "npx",
           "-y",
-          "codebase-memory-mcp@0.11.0"
+          "codebase-memory-mcp@0.12.1"
         ]
       },
       "context7": {
@@ -53,7 +53,7 @@
         "command": [
           "npx",
           "-y",
-          "@jshookmcp/jshook@0.3.4"
+          "@jshookmcp/jshook@0.4.2"
         ],
         "disabled": true
       },

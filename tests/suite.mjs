@@ -978,6 +978,51 @@ test("reinstall preserves restore baseline, user additions, and drops stale repo
   fs.rmSync(tmpBase, { recursive: true, force: true });
 });
 
+test("wave skill-repos-20261024 invariants", async () => {
+  const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  assert.match(agents, /9router/);
+  assert.match(agents, /11 sektor|11 sector/i);
+  assert.match(agents, /max_iterations\s*=\s*3|anti-spin[^\n]*3/i);
+
+  const jsonc = fs.readFileSync(path.join(root, ".opencode/opencode.jsonc"), "utf8");
+  assert.match(jsonc, /codebase-memory-mcp@0\.12\.1/);
+  assert.match(jsonc, /@jshookmcp\/jshook@0\.4\.2/);
+
+  const skillRoot = path.join(root, ".opencode/skills");
+  for (const banned of ["design-bank", "impeccable", "frontend-design"]) {
+    assert.equal(fs.existsSync(path.join(skillRoot, banned)), false, banned);
+  }
+
+  for (const id of [
+    "honey",
+    "brainstorming",
+    "writing-plans",
+    "verification-before-completion",
+    "systematic-debugging",
+  ]) {
+    assert.equal(fs.existsSync(path.join(skillRoot, id, "SKILL.md")), true, `${id} SKILL.md`);
+    assert.equal(fs.existsSync(path.join(skillRoot, id, "PROVENANCE.md")), true, `${id} PROVENANCE.md`);
+  }
+
+  const demoProv = fs.readFileSync(path.join(skillRoot, "demo-video", "PROVENANCE.md"), "utf8");
+  assert.match(demoProv, /767bfb818880c9f38bb02873d3d67141a3e62250/);
+
+  const { parseJsonc } = await import("../scripts/install.mjs");
+  const cfg = parseJsonc(jsonc);
+  const keys = [];
+  const walk = (value) => {
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      keys.push(key);
+      walk(child);
+    }
+  };
+  walk(cfg);
+  const joined = keys.join("\n");
+  assert.equal(/litellm/i.test(joined), false);
+  assert.equal(/jev-model-router/i.test(joined), false);
+});
+
 test("uninstall refuses to guess when the manifest is missing", async () => {
   const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), "sqagi-uninstall-missing-"));
   const targetDir = path.join(tmpBase, "config");

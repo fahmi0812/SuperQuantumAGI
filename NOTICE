@@ -33,3 +33,44 @@ THIRD-PARTY NOTICES & MANDATORY ATTRIBUTIONS
 6. Claude Code Templates
    Copyright (c) 2025 Daniel (San) Ávila (https://github.com/davila7/claude-code-templates).
    Licensed under the MIT License.
+
+7. Honey for Devs
+   Copyright (c) Green-PT (https://github.com/Green-PT/honey-for-devs).
+   Pin cc82b7e7250a8295b4ba556e0aa291d78a9ed38a. Licensed under the MIT License.
+   Density/handoff summary only; hooks and model routing not vendored.
+
+8. Superpowers
+   Copyright (c) obra (https://github.com/obra/superpowers).
+   Pin 2ce8aa15d05bd57213e6f746f953aafb7ded7a8b. Licensed under the MIT License.
+   Adopted missing skills only (brainstorming, writing-plans,
+   verification-before-completion, systematic-debugging). Overlapping TDD /
+   subagent / dispatch skills stay on davila7 / mattpocock local summaries.
+
+9. video-demo
+   Copyright (c) nilbuild (https://github.com/nilbuild/video-demo).
+   Pin 767bfb818880c9f38bb02873d3d67141a3e62250. Licensed under the MIT License.
+   Procedure adapted; engine/scripts not vendored.
+
+10. agents.md
+    Copyright (c) agentsmd (https://github.com/agentsmd/agents.md).
+    Pin d001185d792eb6402a58e4cbef1c228b309ec25d. Licensed under the MIT License.
+    Spirit of a short root AGENTS.md; not a vendored Next.js app.
+
+11. Spec Kit templates
+    Copyright (c) GitHub (https://github.com/github/spec-kit).
+    Pin 67e0f7294e6e728ab60bf7b4590deb470448bc2d. Licensed under the MIT License.
+    Adapted PRD/tech/plan templates in docs/spec/. Specify CLI not vendored.
+
+12. Agent Skills format (skill-creator)
+    Copyright (c) Anthropic (https://github.com/anthropics/skills).
+    Pin dbd4588f9e1033efb41dad4bef2f7947c8993d44. skill-creator Apache-2.0.
+    Format notes in docs/skill-format.md. frontend-design body not copied.
+
+13. awesome-cursorrules
+    Copyright waived (CC0-1.0) by PatrickJS
+    (https://github.com/PatrickJS/awesome-cursorrules).
+    Pin b044f956f021b6e8877f16781bcfc466a6a120e9.
+    Selective generic principles in .opencode/rules/03-cursorrules-adapt.md.
+
+MCP third-party servers remain credits-only. Large source trees (Ghidra,
+infinite-canvas, Design Bank examples) are not vendored.

@@ -2,15 +2,20 @@
 
 Harness orkestrasi multi-agen untuk [OpenCode](https://github.com/opencode-ai/opencode) yang menambahkan pemisahan tugas berbasis sektor, isolasi proses sandbox, dan gerbang verifikasi kualitas deterministik—tanpa memodifikasi runtime inti OpenCode.
 
+**Status:** v0.2.1 · wave `skill-repos-20261024`  
+**Model gateway:** 9router / ninerouter only (LiteLLM & jev-model-router diarsipkan — lihat `docs/archive-alternatives.md`).  
+Panduan agen: [`AGENTS.md`](./AGENTS.md).
+
 ---
 
 ## Prinsip Desain
 
 1. **Non-Invasif:** Berjalan murni di atas ekstensi resmi OpenCode (`.opencode/agents/`, `.opencode/skills/`, `.opencode/commands/`, `.opencode/plugins/`). Biner dan runtime OpenCode tetap 100% bawaan pabrik dan bebas diperbarui kapan saja.
-2. **Routing Bertingkat (Zero-LLM First):** Perintah slash dan pola instruksi umum diproses langsung oleh Layer-0 tanpa membuang token LLM. Tugas kompleks diklasifikasikan ke sektor yang relevan dengan intent 1-ke-1.
-3. **Isolasi Proses (Sandbox):** Eksekusi perintah shell lokal dibatasi menggunakan Linux Bubblewrap (`bwrap`) untuk membatasi akses filesystem dan network sesuai kebutuhan tugas.
+2. **Routing Bertingkat (Zero-LLM First):** Perintah slash dan pola instruksi umum diproses langsung oleh Layer-0 tanpa membuang token LLM. Tugas kompleks diklasifikasikan ke sektor yang relevan dengan intent 1-ke-1. `subagent_depth=1`.
+3. **Isolasi Proses (Sandbox):** Eksekusi perintah shell lokal dibatasi menggunakan Linux Bubblewrap (`bwrap`) fail-closed.
 4. **Koordinasi Single-Writer:** Sub-agen hanya menulis laporan progres ke berkas masing-masing (`runtime/progress.<subagent>.md`). Penggabungan hasil ke dokumen utama (`task_plan.md` dan `findings.md`) hanya dikerjakan oleh Synthesizer untuk mencegah race condition.
-5. **Verifikasi Terukur (Done-Gate):** Tugas baru dianggap selesai jika memenuhi fakta konkret: exit code 0, artifak terbukti ada, dan pengujian hijau. Setelah `git push`, status CI diperiksa langsung sebelum klaim selesai.
+5. **Verifikasi Terukur (Done-Gate):** Tugas baru dianggap selesai jika memenuhi fakta konkret: exit code 0, artifak terbukti ada, dan pengujian hijau. Anti-spin: maksimal 3 iterasi (`max_iterations = 3`). Setelah `git push`, status CI diperiksa langsung sebelum klaim selesai.
+6. **/pentest gated:** Profil ofensif non-aktif secara default. Butuh `--pentest` dan `consent/pentest-scope.json` (NFR11).
 
 ---
 
@@ -61,6 +66,18 @@ Instruksi Pengguna
 | **10. Karier** | Penyesuaian CV dan panduan teknis | Penataan portofolio teknis dan persiapan teknis |
 | **11. DevOps, Infra & Finansial** | Infrastruktur, pipeline CI/CD, dan basis data | GitHub Actions (gh-axi), MongoDB, Supabase, Vercel, audit performa |
 
+`hackathon-winner-thinking` adalah skill biasa, bukan sektor.
+
+---
+
+## Katalog skill
+
+- **Tier 1** — skill default (ops, quality, SmartDoc/SmartBook, coding, demo-video slash-only, …)
+- **Tier 2** — metode & adapter (`honey`, `brainstorming`, `writing-plans`, `verification-before-completion`, `systematic-debugging`; rules cursorrules terpilih; catatan BMAD; pola slim OpenCode)
+- **Tier 3** — pointer saja (`docs/catalog-tier3.md`): format design.md, infinite-canvas, Ghidra MCP eksternal, CLI-Anything hub
+
+**Tidak diadopsi:** Design Bank / Design Intelligence / Design V2 / impeccable UI skill bank; plugin `frontend-design`; runtime BMAD; pohon source Ghidra.
+
 ---
 
 ## Mesin Mandiri (Deterministic Tools)
@@ -75,7 +92,7 @@ Selain pemodelan LLM, repositori ini memuat harness mandiri yang berjalan secara
 
 ## Keamanan & Sandboxing
 
-* **Isolasi Eksekusi:** Perintah kerja dijalankan di lingkungan Linux Bubblewrap (`bwrap`) untuk mencegah modifikasi sistem yang tidak disengaja.
+* **Isolasi Eksekusi:** Perintah kerja dijalankan di lingkungan Linux Bubblewrap (`bwrap`) untuk mencegah modifikasi sistem yang tidak disengaja. Fail-closed jika `bwrap` tidak ada.
 * **Gerbang Izin Khusus (NFR11):** Perangkat uji keamanan ofensif berada dalam profil non-aktif secara default. Penggunaannya mewajibkan token izin eksplisit dan dokumen batasan cakupan (`consent/pentest-scope.json`). File contoh (`.example.json`) otomatis ditolak oleh sistem.
 * **Perlindungan Kredensial:** Seluruh konfigurasi dan skill dilarang mencetak rahasia produksi atau connection string.
 
@@ -87,7 +104,7 @@ Selain pemodelan LLM, repositori ini memuat harness mandiri yang berjalan secara
 * **Node.js:** Versi 22.x atau lebih baru (menggunakan native TypeScript strip-types).
 * **OpenCode:** Versi 2.x
 * **Bubblewrap:** Terpasang pada sistem (`sudo apt install bubblewrap` / `sudo pacman -S bubblewrap`).
-* **Koneksi Model:** Konfigurasi gateway model (mis. 9router) pada `~/.config/opencode/opencode.json`.
+* **Koneksi Model:** Konfigurasi gateway model (9router) pada `~/.config/opencode/opencode.json`. Bukan LiteLLM.
 
 ---
 
@@ -155,6 +172,8 @@ SuperQuantumAGI menerapkan aturan verifikasi berbasis bukti:
 * Setiap pengujian dijalankan lokal melalui `npm test` dan `node ci/run-gates.mjs`.
 * Riwayat keputusan dicatat secara terstruktur untuk audit operasional.
 * Detail profil verifikasi dan aturan pasca-push tersedia di [docs/verification.md](docs/verification.md).
+
+Kerja fitur di cabang `wave/…`. Jangan push ke `main` tanpa review.
 
 ---
 

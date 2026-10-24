@@ -1,5 +1,6 @@
-Source: https://github.com/kuker24/OpenCodeHighEnd
-Pin: 30d394fb37bbe1ca64abe1a660aefd91ac7d99fc
-Path: manual-skills/demo-video
-Upstream-SHA: # TODO: resolve pin
-License: part of OpenCodeHighEnd manual-skills at the pin above.
+Source: https://github.com/nilbuild/video-demo
+Pin: 767bfb818880c9f38bb02873d3d67141a3e62250
+Path: SKILL.md (procedure only)
+Upstream-SHA: 767bfb818880c9f38bb02873d3d67141a3e62250
+License: MIT
+Note: Adapted summary. Engine/scripts not vendored. OCH stub `id-demo-video` replaced. Slash-only.

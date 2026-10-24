@@ -2,5 +2,5 @@ Source: https://github.com/kuker24/OpenCodeHighEnd
 Pin: 30d394fb37bbe1ca64abe1a660aefd91ac7d99fc
 Path: skills/to-tickets
 Upstream: https://github.com/mattpocock/skills
-Upstream-SHA: d81f3a183412e71a5b1e84ca21bc1a35eea03a60
+Upstream-SHA: 5beb35b040e3de97e54fa9e386d7e42d15c295c2
 License: MIT

@@ -2,9 +2,22 @@
 
 ## Unreleased
 
-- High dispatch is serial for one sector. Parallel runs only the named sectors, at most 3, and no longer adds `orchestration-quality` automatically.
-- The `[superq-triage]` line carries `dispatch` and `subagents` from `planDispatch`.
-- The plugin records the planned sector against the subagent that actually ran in `runtime/triage-dispatch.json`.
+## 0.2.1
+
+Wave `skill-repos-20261024`. Layer di atas OpenCode; tidak ada patch core.
+
+- Dispatch high: serial untuk satu sektor. Parallel hanya sektor yang disebut, maks 3, tanpa menambah `orchestration-quality` otomatis.
+- Baris `[superq-triage]` membawa `dispatch` dan `subagents` dari `planDispatch`.
+- Plugin mencatat sektor terencana vs subagent yang benar-benar jalan di `runtime/triage-dispatch.json`.
+- Root `AGENTS.md` (pola agents.md). Template spek di `docs/spec/`. Format skill, catatan BMAD, pola slim (9router-only), katalog Tier 3 pointer.
+- Skill baru T2: `honey`, `brainstorming`, `writing-plans`, `verification-before-completion`, `systematic-debugging`. `demo-video` di-refresh dari nilbuild/video-demo (bukan stub `id-demo-video`).
+- Pin: mattpocock/skills `5beb35b0…`; ECC `90606c83…` pada tiga PROVENANCE; MCP `codebase-memory-mcp@0.12.1`, `@jshookmcp/jshook@0.4.2` (tetap disabled).
+- Design Bank / frontend-design / Ghidra source **tidak** diadopsi. `/pentest` tetap gated. Anti-spin `max_iterations = 3`.
+
+Teks halaman GitHub (tempel manual, jangan `gh repo edit`):
+
+- Description: `OpenCode harness: 11-sector orchestration, bwrap sandbox, done-gate, 9router-only. Layer on top — never patches OpenCode core.`
+- Topics: `opencode, ai-agents, agent-skills, orchestration, bubblewrap, sdd, agents-md, indonesia`
 
 ## 0.2.0
 
