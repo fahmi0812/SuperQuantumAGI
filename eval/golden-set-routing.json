@@ -89,5 +89,26 @@
     "expectedSector": "data-doc-cad",
     "expectedComplexity": "Low",
     "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-14",
+    "prompt": "Build a Godot platformer with jump physics, tilemaps, and gamedev camera follow",
+    "expectedSector": "coding",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-15",
+    "prompt": "Implement a unity3d character controller with collision layers",
+    "expectedSector": "coding",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
+  },
+  {
+    "id": "eval-sec-16",
+    "prompt": "Add Unreal engine gameplay ability system for a third-person game",
+    "expectedSector": "coding",
+    "expectedComplexity": "High",
+    "expectedProfile": "Default"
   }
 ]

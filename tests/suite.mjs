@@ -372,8 +372,17 @@ test("intent keys are unique inside each sector and ties resolve", () => {
   assert.equal(resolveSkillInSector("coding", "vercel_deploy_ops").skillId, "vercel-ops");
   assert.equal(resolveSkillInSector("coding", "gamedev_dispatch_routing").skillId, "gamedev-router");
   assert.equal(resolveSkillInSector("coding", "godot 2d movement").skillId, "gamedev-router");
-  assert.equal(resolveSkillInSector("coding", "unity physics system").skillId, "gamedev-router");
+  assert.equal(resolveSkillInSector("coding", "unity3d physics system").skillId, "gamedev-router");
+  assert.equal(resolveSkillInSector("coding", "unity engine physics").skillId, "gamedev-router");
   assert.equal(resolveSkillInSector("coding", "unreal engine character").skillId, "gamedev-router");
+  assert.notEqual(resolveSkillInSector("coding", "unity di container").skillId, "gamedev-router");
+  const codingT1 = SECTOR_SKILL_REGISTRY.coding.filter((skill) => skill.tier === "T1");
+  const gamedevT1 = codingT1.filter((skill) => skill.id.includes("gamedev"));
+  assert.equal(gamedevT1.length, 1);
+  assert.equal(gamedevT1[0].id, "gamedev-router");
+  for (const skill of codingT1) {
+    assert.equal(fs.existsSync(path.join(root, ".opencode/skills", skill.id, "SKILL.md")), true, skill.id);
+  }
 });
 
 test("triage parser keeps ReAnalysis and does not mark RE as pentest", () => {
@@ -650,6 +659,7 @@ test("registry T1 skills exist as directories and fallback is manual", () => {
     "deep-research-team",
     "cli-pentestv1",
     "geo-sleuth",
+    "browser-act",
   ]) {
     assert.equal(fs.existsSync(path.join(root, ".opencode/skills", gone, "SKILL.md")), false, gone);
   }

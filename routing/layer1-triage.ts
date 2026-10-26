@@ -24,7 +24,7 @@ export function buildTriagePrompt(userPrompt: string): string {
 Classify the following user task into:
 1. SECTOR: exactly one of:
    - orchestration-quality (meta-planning, loops, multi-agent coordination)
-   - coding (software engineering, bug diagnosis, tests, web/mobile)
+   - coding (software engineering, bug diagnosis, tests, web/mobile, game development / engines (Godot, Unity, Unreal, Phaser, pygame, Roblox))
    - reverse-engineering (decompilation, binary analysis, hooking, apk/elf)
    - security-pentest (vulnerability assessment, audit, red-team)
    - osint (geospatial, satellite imagery, public intelligence)

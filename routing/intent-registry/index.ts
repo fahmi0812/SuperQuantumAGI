@@ -182,7 +182,8 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
       normalized.includes("gamedev") ||
       normalized.includes("game dev") ||
       normalized.includes("godot") ||
-      normalized.includes("unity") ||
+      normalized.includes("unity3d") ||
+      normalized.includes("unity engine") ||
       normalized.includes("unreal") ||
       normalized.includes("pygame") ||
       normalized.includes("phaser") ||

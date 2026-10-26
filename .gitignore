@@ -28,6 +28,11 @@ SuperQ-PRD*.md
 SuperQuantumAGI-PRD.md
 superq-*.md
 
+# Session leftovers — keep on disk, do not commit
+PROMP/
+/task_plan.md
+/findings.md
+
 # OS artifacts
 .DS_Store
 Thumbs.db

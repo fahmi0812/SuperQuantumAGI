@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Remove leftover `browser-act` skill. It is not installed in this harness; `playwright-qa` stays door 1.
+- Gamedev coding tie-break no longer matches bare `unity` (use `unity3d` / `unity engine`, aligned with the `unity3d` classifier regex).
+- Layer-1 coding prompt mentions game development / engines (Godot, Unity, Unreal, Phaser, pygame, Roblox).
+- Golden-set routing adds Godot platformer, unity3d, and Unreal engine cases (coding, High, Default). eval-sec-02 (null pointer Jest) stays coding Low.
 - Drop unused MCP stubs from runtime config: `bunkerweb`, `sliver`, `adaptixc2`, `caldera`, `mythic`, `decepticon`, `pentagi`, `strix`, and `shadcn`. Core MCP is `codebase-memory-mcp` + `context7`. RE MCP (`ghidra`, `jshook`, `idapro`) stay disabled/lazy.
 - NFR11 policy still denies known offensive binaries. C2 servers are not shipped.
 - Remove duplicate skills: `parallel-agents`, `systematic-debugging`, `unslop`, `install-anti-slop`, `deep-research-team`. Ghost registry entries `strix` and `deepteam` removed.
