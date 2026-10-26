@@ -638,7 +638,15 @@ test("registry T1 skills exist as directories and fallback is manual", () => {
   }
   assert.deepEqual(missing, []);
   assert.equal(fs.existsSync(path.join(root, ".opencode/skills/nia-oracle/SKILL.md")), true);
-  for (const gone of ["parallel-agents", "systematic-debugging", "unslop", "install-anti-slop", "deep-research-team"]) {
+  for (const gone of [
+    "parallel-agents",
+    "systematic-debugging",
+    "unslop",
+    "install-anti-slop",
+    "deep-research-team",
+    "cli-pentestv1",
+    "geo-sleuth",
+  ]) {
     assert.equal(fs.existsSync(path.join(root, ".opencode/skills", gone, "SKILL.md")), false, gone);
   }
 });

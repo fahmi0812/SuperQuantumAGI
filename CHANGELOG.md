@@ -5,6 +5,7 @@
 - Drop unused MCP stubs from runtime config: `bunkerweb`, `sliver`, `adaptixc2`, `caldera`, `mythic`, `decepticon`, `pentagi`, `strix`, and `shadcn`. Core MCP is `codebase-memory-mcp` + `context7`. RE MCP (`ghidra`, `jshook`, `idapro`) stay disabled/lazy.
 - NFR11 policy still denies known offensive binaries. C2 servers are not shipped.
 - Remove duplicate skills: `parallel-agents`, `systematic-debugging`, `unslop`, `install-anti-slop`, `deep-research-team`. Ghost registry entries `strix` and `deepteam` removed.
+- Remove skills `cli-pentestv1` and `geo-sleuth` from registry and sector definitions; update sector routing.
 
 ## 0.2.1
 

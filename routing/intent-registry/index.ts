@@ -54,10 +54,8 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
   ],
   "security-pentest": [
     { id: "full-audit-keamanan", name: "Full Audit Keamanan", intentKey: "comprehensive_sec_audit", tier: "T1", description: "Full white-box security audit" },
-    { id: "cli-pentestv1", name: "CLI Pentest V1", intentKey: "cli_penetration_testing", tier: "T1", description: "CLI penetration testing toolkit" },
   ],
   "osint": [
-    { id: "geo-sleuth", name: "Geo Sleuth", intentKey: "image_geolocation_recon", tier: "T1", description: "Geolocates images and coordinates" },
     { id: "leafmap", name: "Leafmap", intentKey: "geospatial_satellite_analysis", tier: "T1", description: "Analyzes geospatial raster/vector data" },
   ],
   "motion-media": [

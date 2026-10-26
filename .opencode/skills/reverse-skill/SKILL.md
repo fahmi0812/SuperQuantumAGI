@@ -27,7 +27,7 @@ description: Primary router and methodology for reverse engineering, binary anal
 1. Android package or Frida question: hand the inspection plan to `hypeking`. Do not write exploit payloads.
 2. Native ELF, Mach-O, or PE question: hand disassembly notes to `rea`.
 3. A patch is allowed only after inspection, only on an artifact the operator may modify, and only through `universal-modder`'s revertible plan.
-4. Authorized CLI security testing is `cli-pentestv1` plus NFR11 consent. It is not selected by this router for ordinary reverse engineering.
+4. Authorized security testing requires NFR11 consent. It is not selected by this router for ordinary reverse engineering.
 5. Record format, architecture, and the question being answered in `runtime/progress.reverse-engineering.md`.
 
 Source pointers live in the child skills. This router does not vendor their repositories.

@@ -20,7 +20,7 @@
 |---|---|---|---|
 | **remotion-dev/skills** | No license file in repository | Incompatible with clean permissive distribution. | **`claude-remotion-skill`** (Permissive MIT, by haidrrrry). |
 | **klik-anim-skill-creation** | No license file | Incompatible. | **`claude-motion-design`** (MIT) + **`gsap-skills`** (MIT). |
-| **gods-eye-view** | NOASSERTION / Ambiguous | Risk of copyright ambiguity. | **`leafmap`** (MIT, opengeos) + **`geo-sleuth`** (MIT). |
+| **gods-eye-view** | NOASSERTION / Ambiguous | Risk of copyright ambiguity. | **`leafmap`** (MIT, opengeos). |
 | **Turnitout-Humanizer** | NOASSERTION / Academic ethics risk | Dubious provenance and non-asserted license. | **`antislop-sampler`** (Apache-2.0) + **`humanizer`** (MIT). |
 | **autogki-patcher** | No license | Kernel patching script without license grant. | **Standard mkbootimg / avbtool** (Apache-2.0) via CLI. |
 
