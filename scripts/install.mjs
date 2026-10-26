@@ -25,6 +25,18 @@ const MANAGED_INSTRUCTIONS = [
   "~/.config/opencode/rules/decision-log-protocol.md",
 ];
 
+/** C2/WAF stubs retired from the template. Drop unless the user overrode them. */
+const RETIRED_MCP_SERVERS = new Set([
+  "sliver",
+  "adaptixc2",
+  "pentagi",
+  "strix",
+  "caldera",
+  "mythic",
+  "decepticon",
+  "bunkerweb",
+]);
+
 function hasOwn(obj, key) {
   return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
 }
@@ -389,6 +401,19 @@ export function install(options) {
     }
     currentServers[name] = def;
     nextSnapshot[name] = def;
+  }
+
+  for (const name of Object.keys(currentServers)) {
+    if (templateServers[name]) continue;
+    if (!RETIRED_MCP_SERVERS.has(name)) continue;
+    const current = currentServers[name];
+    const prior = priorSnapshot ? priorSnapshot[name] : undefined;
+    if (prior && current && stable(current) !== stable(prior)) {
+      report.push(`mcp: ${name} -> kept user override`);
+      continue;
+    }
+    delete currentServers[name];
+    report.push(`mcp: ${name} -> removed (retired stub)`);
   }
 
   const currentTimeout = existingConfig.mcp?.timeout;

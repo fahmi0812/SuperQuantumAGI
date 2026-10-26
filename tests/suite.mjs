@@ -638,6 +638,9 @@ test("registry T1 skills exist as directories and fallback is manual", () => {
   }
   assert.deepEqual(missing, []);
   assert.equal(fs.existsSync(path.join(root, ".opencode/skills/nia-oracle/SKILL.md")), true);
+  for (const gone of ["parallel-agents", "systematic-debugging", "unslop", "install-anti-slop", "deep-research-team"]) {
+    assert.equal(fs.existsSync(path.join(root, ".opencode/skills", gone, "SKILL.md")), false, gone);
+  }
 });
 
 test("resolved pins are 40 hex and unresolved URLs stay honest", () => {
@@ -646,7 +649,6 @@ test("resolved pins are 40 hex and unresolved URLs stay honest", () => {
     "humanizer",
     "rea",
     "diagram-design",
-    "unslop",
     "api-design",
     "pageindex",
   ];
@@ -662,7 +664,7 @@ test("resolved pins are 40 hex and unresolved URLs stay honest", () => {
   assert.match(perf, /URL: TBD/);
   assert.match(perf, /# TODO: resolve pin/);
   assert.equal(resolveSkillInSector("coding", "rest api design").skillId, "api-design");
-  assert.equal(resolveSkillInSector("writing", "unslop this note").skillId, "unslop");
+  assert.equal(resolveSkillInSector("writing", "unslop this note").skillId, "humanizer");
   assert.equal(resolveSkillInSector("data-doc-cad", "pptx briefing").skillId, "pptx-official");
   assert.equal(resolveSkillInSector("motion-media", "architecture diagram").skillId, "diagram-design");
 });
@@ -795,6 +797,12 @@ test("install script creates symlinks, merges opencode config non-destructively,
     permissions: [{ action: "custom", effect: "deny" }],
     agent: { custom_agent: { mode: "subagent" } },
     default_agent: "build",
+    mcp: {
+      servers: {
+        sliver: { type: "local", command: ["sliver-server"], disabled: true },
+        bunkerweb: { type: "remote", url: "http://127.0.0.1:8081/mcp", disabled: true },
+      },
+    },
   };
   fs.writeFileSync(path.join(targetDir, "opencode.json"), JSON.stringify(initialConfig, null, 2));
 
@@ -817,7 +825,10 @@ test("install script creates symlinks, merges opencode config non-destructively,
   assert.equal(merged.model, "custom-provider/custom-model");
   assert.equal(merged.agent.custom_agent.mode, "subagent");
   assert.equal(merged.mcp.servers["codebase-memory-mcp"].type, "local");
-  assert.equal(merged.mcp.servers["sliver"].disabled, true);
+  assert.equal(merged.mcp.servers.context7.type, "remote");
+  assert.equal(merged.mcp.servers.sliver, undefined);
+  assert.equal(merged.mcp.servers.bunkerweb, undefined);
+  assert.equal(merged.mcp.servers.shadcn, undefined);
   assert.equal(merged.experimental.subagent_depth, 1);
 
   const uninstallRes = installMod.uninstall({ dryRun: false, targetDir, binDir });
@@ -998,7 +1009,6 @@ test("wave skill-repos-20261024 invariants", async () => {
     "brainstorming",
     "writing-plans",
     "verification-before-completion",
-    "systematic-debugging",
   ]) {
     assert.equal(fs.existsSync(path.join(skillRoot, id, "SKILL.md")), true, `${id} SKILL.md`);
     assert.equal(fs.existsSync(path.join(skillRoot, id, "PROVENANCE.md")), true, `${id} PROVENANCE.md`);
@@ -1021,6 +1031,10 @@ test("wave skill-repos-20261024 invariants", async () => {
   const joined = keys.join("\n");
   assert.equal(/litellm/i.test(joined), false);
   assert.equal(/jev-model-router/i.test(joined), false);
+  assert.equal(cfg.mcp.servers.sliver, undefined);
+  assert.equal(cfg.mcp.servers.bunkerweb, undefined);
+  assert.equal(cfg.mcp.servers.shadcn, undefined);
+  assert.equal(cfg.mcp.servers.strix, undefined);
 });
 
 test("uninstall refuses to guess when the manifest is missing", async () => {

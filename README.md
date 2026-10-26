@@ -73,7 +73,7 @@ Instruksi Pengguna
 ## Katalog skill
 
 - **Tier 1** — skill default (ops, quality, SmartDoc/SmartBook, coding, demo-video slash-only, …)
-- **Tier 2** — metode & adapter (`honey`, `brainstorming`, `writing-plans`, `verification-before-completion`, `systematic-debugging`; rules cursorrules terpilih; catatan BMAD; pola slim OpenCode)
+- **Tier 2** — metode & adapter (`honey`, `brainstorming`, `writing-plans`, `verification-before-completion`; rules cursorrules terpilih; catatan BMAD; pola slim OpenCode)
 - **Tier 3** — pointer saja (`docs/catalog-tier3.md`): format design.md, infinite-canvas, Ghidra MCP eksternal, CLI-Anything hub
 
 **Tidak diadopsi:** Design Bank / Design Intelligence / Design V2 / impeccable UI skill bank; plugin `frontend-design`; runtime BMAD; pohon source Ghidra.
@@ -162,7 +162,7 @@ Setelah dipasang secara global:
    ```bash
    opencode mcp list
    ```
-   Server utama (`codebase-memory-mcp`, `context7`, `shadcn`) akan berstatus `connected`.
+   Server utama (`codebase-memory-mcp`, `context7`) akan berstatus `connected`.
 
 ---
 

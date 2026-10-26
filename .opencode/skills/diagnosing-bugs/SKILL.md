@@ -22,7 +22,7 @@ Pakai sebelum patch apa pun. Jangan pakai untuk menambah fitur yang belum gagal.
 
 1. Reproduksi kegagalan dengan perintah atau tes terkecil.
 2. Telusuri nilai buruk ke penulisan yang membuatnya.
-3. Nyatakan apakah perubahan memperbaiki sebab atau hanya gejala.
+3. Nyatakan apakah perubahan memperbaiki sebab atau hanya gejala. Lanjut ke `root-cause-gate` sebelum patch.
 4. Cari pola yang sama di modul lain. Jika ada, berhenti dan minta consent sebelum melebar.
 5. Tes lokal hijau belum selesai sampai artefak done-gate ada.
 

@@ -8,7 +8,7 @@ compatibility: opencode
 
 Find what a change breaks somewhere else, before it ships. Listing the callers is not the job. The job is the breakage grep will not show you.
 
-Use repo evidence first. Codebase Memory if a project exists for cwd. Do not invoke `/why`, `/arena`, or `/unslop`. Optional multi-candidate compare follows `.opencode/rules/arena-protocol.md` **inline** and only for a wide change.
+Use repo evidence first. Codebase Memory if a project exists for cwd. Do not invoke `/why`, `/arena`, or `humanizer`. Optional multi-candidate compare follows `.opencode/rules/arena-protocol.md` **inline** and only for a wide change.
 
 ## Don't trust your own writeup
 

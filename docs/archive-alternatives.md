@@ -28,7 +28,7 @@
 
 ## 3. Copyleft / AGPL Offensive Tools (Not Vendored)
 
-These tools are not included in the repository source tree to protect repository license hygiene. They are supported strictly as external, detached pointers or network endpoints if invoked under an authorized `--pentest` scope:
+These tools are not included in the repository source tree to protect repository license hygiene. They are **not** registered as MCP servers in `.opencode/opencode.jsonc`. Pointers only; NFR11 still denies the binaries without `--pentest` and live consent:
 
 | Component | License | Archive / Pointer Status | Permissive / Native Alternative |
 |---|---|---|---|

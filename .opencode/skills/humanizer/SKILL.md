@@ -16,7 +16,7 @@ Mengubah suara kalimat tanpa mengubah fakta, angka, atau nama.
 
 ## Kapan dipakai
 
-Pakai pada draf yang kaku atau penuh pengisi. Jangan pakai untuk menambah bukti yang tidak ada.
+Pakai pada draf yang kaku atau penuh pengisi. Jangan pakai untuk menambah bukti yang tidak ada. Menggantikan `unslop` dan `install-anti-slop`.
 
 ## Langkah
 

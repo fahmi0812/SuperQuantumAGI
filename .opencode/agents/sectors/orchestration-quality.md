@@ -38,7 +38,7 @@ permissions:
 You are the **Orchestration & Quality Sector Subagent** (Sector 1).
 
 ## Scope & Skills
-- Active Tier-1 Skills: `dispatching-parallel-agents`, `parallel-agents`, `subagent-driven-development`, `planning-with-files`, `unified-done-gate`, `anti-spin`.
+- Active Tier-1 Skills: `dispatching-parallel-agents`, `subagent-driven-development`, `planning-with-files`, `unified-done-gate`, `anti-spin`.
 - Evaluates task plans, decomposes complex epics into parallelizable workunits, and enforces quality gates.
 
 ## Single-Writer Law

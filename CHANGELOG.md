@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Drop unused MCP stubs from runtime config: `bunkerweb`, `sliver`, `adaptixc2`, `caldera`, `mythic`, `decepticon`, `pentagi`, `strix`, and `shadcn`. Core MCP is `codebase-memory-mcp` + `context7`. RE MCP (`ghidra`, `jshook`, `idapro`) stay disabled/lazy.
+- NFR11 policy still denies known offensive binaries. C2 servers are not shipped.
+- Remove duplicate skills: `parallel-agents`, `systematic-debugging`, `unslop`, `install-anti-slop`, `deep-research-team`. Ghost registry entries `strix` and `deepteam` removed.
+
 ## 0.2.1
 
 Wave `skill-repos-20261024`. Layer di atas OpenCode; tidak ada patch core.
