@@ -1,8 +1,8 @@
 # SuperQuantumAGI
 
-Harness orkestrasi multi-agen untuk [OpenCode](https://github.com/opencode-ai/opencode) yang menambahkan pemisahan tugas berbasis sektor, isolasi proses sandbox, dan gerbang verifikasi kualitas deterministik—tanpa memodifikasi runtime inti OpenCode.
+Harness orkestrasi multi-agen untuk [OpenCode](https://github.com/opencode-ai/opencode) yang menambahkan pemisahan tugas berbasis 11 sektor, isolasi proses sandbox bwrap, gerbang verifikasi kualitas deterministik (done-gate & anti-spin), routing gamedev dinamis 76+ skills, dan SmartDoc—tanpa memodifikasi runtime inti OpenCode.
 
-**Status:** v0.2.1 · wave `skill-repos-20261024`  
+**Status:** v0.2.2 · production-grade multi-agent harness  
 **Model gateway:** 9router / ninerouter only (LiteLLM & jev-model-router diarsipkan — lihat `docs/archive-alternatives.md`).  
 Panduan agen: [`AGENTS.md`](./AGENTS.md).
 
@@ -55,7 +55,7 @@ Instruksi Pengguna
 | Sektor | Fokus Tugas | Kemampuan Utama |
 |---|---|---|
 | **01. Orchestration & Quality** | Perencanaan, evaluasi loop, done-gate | Multi-agent fanout, anti-spin, quality gates |
-| **02. Coding & Engineering** | Pengembangan software, bug fixing, review | TDD, API design, contract-first, code review, debugging |
+| **02. Coding & Engineering** | Pengembangan software, bug fixing, review, gamedev | TDD, API design, contract-first, code review, debugging, dynamic GameDev router (Godot, Unity, Unreal, Phaser, Pygame, Bevy, Roblox, Three.js) |
 | **03. Reverse Engineering** | Analisis biner dan aplikasi lokal | Format inspeksi, dekompilasi native, analisis APK |
 | **04. Keamanan & Pentest** | Audit keamanan lokal berbasis izin (NFR11) | Pemetaan kerentanan statis, sanitasi input, audit dependensi |
 | **05. OSINT & Geospasial** | Analisis data spasial dan citra terbuka | Pengolahan koordinat, metadata citra, peta vektor/raster |
@@ -72,11 +72,12 @@ Instruksi Pengguna
 
 ## Katalog skill
 
-- **Tier 1** — skill default (ops, quality, SmartDoc/SmartBook, coding, demo-video slash-only, …)
+- **Tier 1** — skill default (ops, quality, SmartDoc/SmartBook, coding, `gamedev-router` facade, demo-video slash-only, …)
+- **Game Development Pack (Dynamic Hierarchical Routing)** — 76 leaf skills spesifik engine, genre, dan disiplin (Godot, Unity, Unreal, Ebitengine, Bevy, Phaser, PixiJS, Three.js, Defold, LÖVE, Pygame, Roblox) di bawah kendali satu master facade `gamedev-router` (Tier-1 Coding). Seluruh leaf dikonfigurasi `metadata.opencode/autoinvoke: false` agar tidak membebani context window prompt (zero context bloat), dan dimuat secara on-demand sesuai fingerprint engine & task proyek.
 - **Tier 2** — metode & adapter (`honey`, `brainstorming`, `writing-plans`, `verification-before-completion`; rules cursorrules terpilih; catatan BMAD; pola slim OpenCode)
 - **Tier 3** — pointer saja (`docs/catalog-tier3.md`): format design.md, infinite-canvas, Ghidra MCP eksternal, CLI-Anything hub
 
-**Tidak diadopsi:** Design Bank / Design Intelligence / Design V2 / impeccable UI skill bank; plugin `frontend-design`; runtime BMAD; pohon source Ghidra.
+**Tidak diadopsi:** Design Bank / Design Intelligence / Design V2 / impeccable UI skill bank; plugin `frontend-design`; runtime BMAD; pohon source Ghidra; `browser-act` CLI (verifikasi browser default tetap `playwright-qa`).
 
 ---
 
@@ -85,6 +86,7 @@ Instruksi Pengguna
 Selain pemodelan LLM, repositori ini memuat harness mandiri yang berjalan secara lokal:
 
 * **SmartDoc & SmartBook (`harness/smartdoc/`)**: Ekstraksi teks native (DOCX, PDF, gambar), audit kemiripan n-gram lokal terhadap korpus dokumen, serta penyusunan basis pengetahuan lokal tanpa modifikasi global.
+* **GameDev Router & Engine Fingerprinter (`.opencode/skills/gamedev-router/`)**: Deteksi engine otomatis berdasarkan artefak proyek (`project.godot`, `Assets/`, `*.uproject`, `go.mod`, `Cargo.toml`, `package.json`, dsb.) dan orkestrasi skill game yang presisi tanpa prompt bloat.
 * **Codebase Memory (`codebase-memory-mcp`)**: Pengindeksan graf arsitektur kode lokal untuk membaca dependensi, modul, dan call graph.
 * **Context7**: Pencarian referensi sintaks dokumentasi pustaka langsung dari sumber terverifikasi.
 
@@ -184,7 +186,10 @@ Repositori ini menyertakan dan mengintegrasikan perangkat pihak ketiga dengan at
 - **Serena / SolidLSP:** Antarmuka eksternal MCP untuk Serena (GPL-3.0-or-later) oleh Jain & Panchenko IT-Berater Partnerschaft (Oraios AI). Tidak di-vendor ke dalam repositori.
 - **DeusData Codebase Memory MCP:** Hak Cipta (c) 2025 DeusData (Lisensi MIT).
 - **Context7:** Hak Cipta (c) 2021 Upstash, Inc. (Lisensi MIT).
+- **Awesome GameDev Agent Skills:** Hak Cipta (c) 2026 gamedev-skills (https://github.com/gamedev-skills/awesome-gamedev-agent-skills). Lisensi Apache-2.0. Pin `184b72be02884f782a0058f2eeae2ce4277453e4`. Diadopsi untuk 76 leaf gamedev skills & dynamic router.
 - **shadcn/ui:** Hak Cipta (c) 2023 shadcn (Lisensi MIT).
 - **Claude Code Templates:** Hak Cipta (c) 2025 Daniel (San) Ávila (Lisensi MIT).
+- **Superpowers:** Hak Cipta (c) 2025 obra (Lisensi MIT).
+- **Honey for Devs:** Hak Cipta (c) 2025 Green-PT (Lisensi MIT).
 
 Rincian lengkap lisensi dan hak cipta tercantum pada berkas `NOTICE` dan `THIRD_PARTY_LICENSES`.

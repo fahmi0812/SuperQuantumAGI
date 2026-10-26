@@ -72,5 +72,10 @@ THIRD-PARTY NOTICES & MANDATORY ATTRIBUTIONS
     Pin b044f956f021b6e8877f16781bcfc466a6a120e9.
     Selective generic principles in .opencode/rules/03-cursorrules-adapt.md.
 
+14. Awesome GameDev Agent Skills
+    Copyright (c) 2026 gamedev-skills (https://github.com/gamedev-skills/awesome-gamedev-agent-skills).
+    Pin 184b72be02884f782a0058f2eeae2ce4277453e4. Licensed under the Apache License, Version 2.0.
+    Adopted 76 leaf game development skills with dynamic on-demand routing via gamedev-router facade under Sector 2 (coding).
+
 MCP third-party servers remain credits-only. Large source trees (Ghidra,
 infinite-canvas, Design Bank examples) are not vendored.

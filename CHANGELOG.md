@@ -1,16 +1,21 @@
 # Changelog
 
-## Unreleased
+## 0.2.2
 
-- Remove leftover `browser-act` skill. It is not installed in this harness; `playwright-qa` stays door 1.
+- Import 76 game development skills and master `gamedev-router` from `gamedev-skills/awesome-gamedev-agent-skills` (Apache-2.0, pin `184b72be02884f782a0058f2eeae2ce4277453e4`). Dynamic hierarchical routing under Sector 2 (coding) with `metadata.opencode/autoinvoke: false` on leaf skills to prevent prompt bloat while allowing on-demand loading.
 - Gamedev coding tie-break no longer matches bare `unity` (use `unity3d` / `unity engine`, aligned with the `unity3d` classifier regex).
 - Layer-1 coding prompt mentions game development / engines (Godot, Unity, Unreal, Phaser, pygame, Roblox).
 - Golden-set routing adds Godot platformer, unity3d, and Unreal engine cases (coding, High, Default). eval-sec-02 (null pointer Jest) stays coding Low.
+- Remove leftover `browser-act` skill. It is not installed in this harness; `playwright-qa` stays door 1.
 - Drop unused MCP stubs from runtime config: `bunkerweb`, `sliver`, `adaptixc2`, `caldera`, `mythic`, `decepticon`, `pentagi`, `strix`, and `shadcn`. Core MCP is `codebase-memory-mcp` + `context7`. RE MCP (`ghidra`, `jshook`, `idapro`) stay disabled/lazy.
 - NFR11 policy still denies known offensive binaries. C2 servers are not shipped.
 - Remove duplicate skills: `parallel-agents`, `systematic-debugging`, `unslop`, `install-anti-slop`, `deep-research-team`. Ghost registry entries `strix` and `deepteam` removed.
 - Remove skills `cli-pentestv1` and `geo-sleuth` from registry and sector definitions; update sector routing.
-- Import 76 game development skills and master `gamedev-router` from `gamedev-skills/awesome-gamedev-agent-skills` (Apache-2.0, pin `184b72be02884f782a0058f2eeae2ce4277453e4`). Dynamic hierarchical routing under Sector 2 (coding) with `metadata.opencode/autoinvoke: false` on leaf skills to prevent prompt bloat while allowing on-demand loading.
+
+Teks halaman GitHub:
+
+- Description: `Non-invasive OpenCode harness: 11-sector orchestration, bwrap sandbox, done-gate quality loop, SmartDoc engine, 76+ dynamic gamedev skills, 9router-only.`
+- Topics: `opencode, ai-agents, orchestration, agent-skills, gamedev, smartdoc, bubblewrap, done-gate, sdd, agents-md, indonesia`
 
 ## 0.2.1
 
