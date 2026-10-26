@@ -6,6 +6,7 @@
 - NFR11 policy still denies known offensive binaries. C2 servers are not shipped.
 - Remove duplicate skills: `parallel-agents`, `systematic-debugging`, `unslop`, `install-anti-slop`, `deep-research-team`. Ghost registry entries `strix` and `deepteam` removed.
 - Remove skills `cli-pentestv1` and `geo-sleuth` from registry and sector definitions; update sector routing.
+- Import 76 game development skills and master `gamedev-router` from `gamedev-skills/awesome-gamedev-agent-skills` (Apache-2.0, pin `184b72be02884f782a0058f2eeae2ce4277453e4`). Dynamic hierarchical routing under Sector 2 (coding) with `metadata.opencode/autoinvoke: false` on leaf skills to prevent prompt bloat while allowing on-demand loading.
 
 ## 0.2.1
 

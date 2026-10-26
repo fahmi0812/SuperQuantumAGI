@@ -370,6 +370,10 @@ test("intent keys are unique inside each sector and ties resolve", () => {
   assert.equal(resolveSkillInSector("coding", "mongodb_schema_ops").skillId, "mongodb-ops");
   assert.equal(resolveSkillInSector("coding", "supabase_backend_ops").skillId, "supabase-ops");
   assert.equal(resolveSkillInSector("coding", "vercel_deploy_ops").skillId, "vercel-ops");
+  assert.equal(resolveSkillInSector("coding", "gamedev_dispatch_routing").skillId, "gamedev-router");
+  assert.equal(resolveSkillInSector("coding", "godot 2d movement").skillId, "gamedev-router");
+  assert.equal(resolveSkillInSector("coding", "unity physics system").skillId, "gamedev-router");
+  assert.equal(resolveSkillInSector("coding", "unreal engine character").skillId, "gamedev-router");
 });
 
 test("triage parser keeps ReAnalysis and does not mark RE as pentest", () => {
@@ -675,6 +679,102 @@ test("resolved pins are 40 hex and unresolved URLs stay honest", () => {
   assert.equal(resolveSkillInSector("writing", "unslop this note").skillId, "humanizer");
   assert.equal(resolveSkillInSector("data-doc-cad", "pptx briefing").skillId, "pptx-official");
   assert.equal(resolveSkillInSector("motion-media", "architecture diagram").skillId, "diagram-design");
+});
+
+test("gamedev skill pack contains 76 leaf skills with autoinvoke false and provenance", () => {
+  const gamedevLeaves = [
+    "ai-behavior-trees-utility-ai",
+    "audio-design",
+    "camera-systems",
+    "create-game-assets",
+    "dialogue-systems",
+    "game-ai",
+    "game-feel",
+    "game-ui-ux",
+    "input-systems",
+    "level-design",
+    "performance-optimization",
+    "physics-tuning",
+    "procedural-gen",
+    "save-systems",
+    "shader-programming",
+    "ebitengine-game",
+    "card-game",
+    "fps-shooter",
+    "platformer",
+    "puzzle",
+    "roguelike",
+    "rpg",
+    "survival-crafting",
+    "tower-defense",
+    "visual-novel",
+    "godot-2d-movement",
+    "godot-3d-essentials",
+    "godot-animation",
+    "godot-audio",
+    "godot-csharp",
+    "godot-export",
+    "godot-gdscript-headless-testing",
+    "godot-gdscript",
+    "godot-multiplayer",
+    "godot-nodes-scenes",
+    "godot-physics",
+    "godot-resources",
+    "godot-shaders",
+    "godot-signals-groups",
+    "godot-tilemap",
+    "godot-ui-control",
+    "bevy-ecs",
+    "defold-core",
+    "love2d-core",
+    "pygame-core",
+    "roblox-characters",
+    "roblox-datastores",
+    "roblox-luau",
+    "roblox-networking",
+    "roblox-physics",
+    "roblox-studio-workflow",
+    "roblox-ui",
+    "unity-animation",
+    "unity-build-pipeline",
+    "unity-csharp-scripting",
+    "unity-input-system",
+    "unity-navmesh",
+    "unity-physics",
+    "unity-scriptableobjects",
+    "unity-tilemap-2d",
+    "unreal-behavior-trees",
+    "unreal-blueprints",
+    "unreal-cpp-gameplay",
+    "unreal-enhanced-input",
+    "unreal-niagara",
+    "unreal-packaging",
+    "phaser-arcade-physics",
+    "phaser-core",
+    "pixijs-rendering",
+    "threejs-gltf-loading",
+    "threejs-materials-lighting",
+    "threejs-scene-setup",
+    "game-jam",
+    "itch-publish",
+    "prototype-fast",
+    "steam-publish",
+  ];
+  assert.equal(gamedevLeaves.length, 76);
+  for (const id of gamedevLeaves) {
+    const skillPath = path.join(root, ".opencode/skills", id, "SKILL.md");
+    const provPath = path.join(root, ".opencode/skills", id, "PROVENANCE.md");
+    assert.equal(fs.existsSync(skillPath), true, `${id} SKILL.md missing`);
+    assert.equal(fs.existsSync(provPath), true, `${id} PROVENANCE.md missing`);
+    const text = fs.readFileSync(skillPath, "utf8");
+    assert.match(text, /opencode\/autoinvoke:\s*false/, `${id} missing autoinvoke false`);
+    const prov = fs.readFileSync(provPath, "utf8");
+    assert.match(prov, /184b72be02884f782a0058f2eeae2ce4277453e4/);
+  }
+  const routerPath = path.join(root, ".opencode/skills/gamedev-router/SKILL.md");
+  assert.equal(fs.existsSync(routerPath), true);
+  const routerText = fs.readFileSync(routerPath, "utf8");
+  assert.match(routerText, /^---\nname:\s*gamedev-router/);
 });
 
 test("node 20 is rejected by npm test and CI pins Node 22", () => {

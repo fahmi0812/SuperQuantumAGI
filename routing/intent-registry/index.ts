@@ -45,6 +45,7 @@ export const SECTOR_SKILL_REGISTRY: Record<SectorID, SkillEntry[]> = {
     { id: "mongodb-ops", name: "MongoDB Ops", intentKey: "mongodb_schema_ops", tier: "T1", description: "MongoDB data modeling, schemas, and queries in application code" },
     { id: "supabase-ops", name: "Supabase Ops", intentKey: "supabase_backend_ops", tier: "T1", description: "Supabase client integration, RLS, and backend routes in application code" },
     { id: "vercel-ops", name: "Vercel Ops", intentKey: "vercel_deploy_ops", tier: "T1", description: "Next.js routing, edge runtime, and Vercel configuration in application code" },
+    { id: "gamedev-router", name: "GameDev Router", intentKey: "gamedev_dispatch_routing", tier: "T1", description: "Routes game-dev requests and dynamically loads specialized engine/genre/discipline skills" },
   ],
   "reverse-engineering": [
     { id: "reverse-skill", name: "Reverse Skill", intentKey: "re_router_primary", tier: "T1", description: "Primary router for binary and app decompilation" },
@@ -176,6 +177,25 @@ export function resolveSkillInSector(sector: SectorID, queryIntent: string): { s
     }
     if (normalized.includes("vercel")) {
       return { skillId: "vercel-ops", status: "tie_break" };
+    }
+    if (
+      normalized.includes("gamedev") ||
+      normalized.includes("game dev") ||
+      normalized.includes("godot") ||
+      normalized.includes("unity") ||
+      normalized.includes("unreal") ||
+      normalized.includes("pygame") ||
+      normalized.includes("phaser") ||
+      normalized.includes("pixi") ||
+      normalized.includes("threejs") ||
+      normalized.includes("three.js") ||
+      normalized.includes("ebiten") ||
+      normalized.includes("bevy") ||
+      normalized.includes("defold") ||
+      normalized.includes("love2d") ||
+      normalized.includes("roblox")
+    ) {
+      return { skillId: "gamedev-router", status: "tie_break" };
     }
   }
 

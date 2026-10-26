@@ -94,6 +94,13 @@ const RULES: ClassRule[] = [
   {
     sector: "coding",
     profile: "Default",
+    complexity: "High",
+    weight: 8,
+    pattern: /\b(gamedev|game dev|godot|unity3d|unreal engine|pygame|phaser|ebitengine|defold|love2d|roblox studio)\b/i,
+  },
+  {
+    sector: "coding",
+    profile: "Default",
     complexity: "Low",
     weight: 6,
     pattern: /\b(null pointer|jest|exception|bugfix|refactor)\b/i,
